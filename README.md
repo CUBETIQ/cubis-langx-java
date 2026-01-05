@@ -18,6 +18,7 @@ A powerful and flexible translation (i18n) library for Java applications includi
 -   🎧 Event listeners for loading and error handling
 -   🐛 Debug mode for development
 -   ⚡ Thread-safe and optimized for performance
+-   🌐 **Combined locales** - Display multiple languages in one result
 
 ✨ **Auto-Translation Features:**
 
@@ -153,6 +154,44 @@ String greeting = lang.get("greeting");
 
 lang.setLocale("en"); // Switch back to English
 ```
+
+### Combined Locales
+
+Display translations from multiple languages in a single result - perfect for multilingual labels, tourist signs, or language learning apps:
+
+```java
+CubisLang lang = new CubisLang(
+    CubisLangOptions.builder()
+        .setDefaultLocale("en")
+        .setResourcePath("./resources/lang/")
+        .setCombineLocales(Arrays.asList("en", "km", "zh"))
+        .setCombineSeparator(" / ")
+        .build()
+);
+
+String greeting = lang.get("greeting");
+// Output: Hello / សួស្តី / 你好
+
+// Custom separator
+.setCombineSeparator(" | ")  // Output: Hello | សួស្តី | 你好
+
+// Works with formatting too
+String welcome = lang.get("welcome", "John");
+// Output: Welcome John / សូមស្វាគមន៍ John / 欢迎 John
+```
+
+**Smart handling of missing translations:**
+
+-   If a translation exists in only some locales, only those are shown
+-   If no translations are found in any locale, returns the key
+-   Example: If "farewell" exists in English and Chinese but not Khmer: `"Goodbye / 再见"`
+
+**Use cases:**
+
+-   🏷️ Multilingual product labels (international packaging)
+-   🗺️ Tourist information signs (show multiple languages)
+-   📚 Language learning apps (display side-by-side translations)
+-   🌍 International business cards and documents
 
 ## Advanced Configuration
 

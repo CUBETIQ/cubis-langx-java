@@ -18,8 +18,6 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -84,6 +82,11 @@ public class CubisLang {
      * @return the translated and formatted string
      */
     public String get(String key, Object... args) {
+        // Check if combine locales is enabled
+        if (options.isCombineLocalesEnabled()) {
+            return getCombined(key, args);
+        }
+        
         String translation = getTranslation(currentLocale, key);
         
         if (translation == null) {
@@ -99,6 +102,80 @@ public class CubisLang {
         }
         
         return translation;
+    }
+
+    /**
+     * Gets the combined translation for multiple locales.
+     * Returns translations from all specified locales separated by the configured separator.
+     * If a translation is not found in a locale, it skips that locale.
+     * If no translations are found in any locale, returns the key.
+     *
+     * @param key  the translation key
+     * @param args optional formatting arguments
+     * @return the combined translations separated by the separator
+     */
+    public String getCombined(String key, Object... args) {
+        List<String> combineLocales = options.getCombineLocales();
+        String separator = options.getCombineSeparator();
+        
+        if (combineLocales == null || combineLocales.isEmpty()) {
+            // Fallback to normal get if no combine locales configured
+            return get(key, args);
+        }
+        
+        List<String> foundTranslations = new ArrayList<>();
+        
+        for (String locale : combineLocales) {
+            // Ensure translations are loaded for this locale
+            if (!translations.containsKey(locale)) {
+                loadTranslations(locale);
+            }
+            
+            // Get translation from specific locale without fallback
+            String translation = getTranslationFromLocale(locale, key);
+            
+            if (translation != null) {
+                // Format with positional arguments if provided
+                if (args != null && args.length > 0) {
+                    translation = formatWithPositionalArgs(translation, args);
+                }
+                foundTranslations.add(translation);
+            }
+        }
+        
+        // If no translations found, return the key
+        if (foundTranslations.isEmpty()) {
+            if (options.getMissingTranslationHandler() != null) {
+                for (String locale : combineLocales) {
+                    options.getMissingTranslationHandler().onMissingTranslation(locale, key);
+                }
+            }
+            return key;
+        }
+        
+        // Join all found translations with separator
+        return String.join(separator, foundTranslations);
+    }
+
+    /**
+     * Gets translation from a specific locale without fallback.
+     * This is used internally for combined locales feature.
+     *
+     * @param locale the locale to get translation from
+     * @param key the translation key
+     * @return the translation or null if not found in that specific locale
+     */
+    private String getTranslationFromLocale(String locale, String key) {
+        JsonObject localeTranslations = translations.get(locale);
+        
+        if (localeTranslations != null) {
+            JsonElement element = getNestedValue(localeTranslations, key);
+            if (element != null && element.isJsonPrimitive()) {
+                return element.getAsString();
+            }
+        }
+        
+        return null;
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.cubetiqs.cubislang;
 
+import java.util.List;
+
 /**
  * Configuration options for CubisLang translation system.
  * Use the builder pattern to create instances.
@@ -21,6 +23,9 @@ public class CubisLangOptions {
     private final MissingTranslationHandler missingTranslationHandler;
     private final boolean autoTranslateEnabled;
     private final TranslationAdapter translationAdapter;
+    private Boolean combineLocalesEnabled = null; // default: depends on whether combineLocales is set
+    private final List<String> combineLocales;
+    private final String combineSeparator;
 
     private CubisLangOptions(Builder builder) {
         this.defaultLocale = builder.defaultLocale;
@@ -39,6 +44,10 @@ public class CubisLangOptions {
         this.missingTranslationHandler = builder.missingTranslationHandler;
         this.autoTranslateEnabled = builder.autoTranslateEnabled;
         this.translationAdapter = builder.translationAdapter;
+
+        this.combineLocalesEnabled = builder.combineLocalesEnabled;
+        this.combineLocales = builder.combineLocales;
+        this.combineSeparator = builder.combineSeparator;
     }
 
     public static Builder builder() {
@@ -62,6 +71,14 @@ public class CubisLangOptions {
     public MissingTranslationHandler getMissingTranslationHandler() { return missingTranslationHandler; }
     public boolean isAutoTranslateEnabled() { return autoTranslateEnabled; }
     public TranslationAdapter getTranslationAdapter() { return translationAdapter; }
+    public boolean isCombineLocalesEnabled() { 
+        if (combineLocalesEnabled == null) {
+            return combineLocales != null && !combineLocales.isEmpty();
+        }
+        return combineLocalesEnabled;
+     }
+    public List<String> getCombineLocales() { return combineLocales; }
+    public String getCombineSeparator() { return combineSeparator; }
 
     /**
      * Builder class for CubisLangOptions.
@@ -83,6 +100,9 @@ public class CubisLangOptions {
         private MissingTranslationHandler missingTranslationHandler = null;
         private boolean autoTranslateEnabled = false;
         private TranslationAdapter translationAdapter = null;
+        private Boolean combineLocalesEnabled = null; // default: depends on whether combineLocales is set
+        private List<String> combineLocales = null;
+        private String combineSeparator = " / ";
 
         public Builder setDefaultLocale(String defaultLocale) {
             this.defaultLocale = defaultLocale;
@@ -161,6 +181,21 @@ public class CubisLangOptions {
 
         public Builder setTranslationAdapter(TranslationAdapter translationAdapter) {
             this.translationAdapter = translationAdapter;
+            return this;
+        }
+
+        public Builder setCombineLocalesEnabled(Boolean combineLocalesEnabled) {
+            this.combineLocalesEnabled = combineLocalesEnabled;
+            return this;
+        }
+
+        public Builder setCombineLocales(List<String> combineLocales) {
+            this.combineLocales = combineLocales;
+            return this;
+        }
+
+        public Builder setCombineSeparator(String combineSeparator) {
+            this.combineSeparator = combineSeparator;
             return this;
         }
 
