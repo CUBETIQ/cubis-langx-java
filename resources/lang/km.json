@@ -1,0 +1,16 @@
+{
+  "greeting": "សួស្តី!",
+  "Hello World!": "សួស្តីពិភពលោក!",
+  "welcome_user": "សូមស្វាគមន៍, {{0}}!",
+  "item_count": "អ្នកមាន {{count}} ធាតុ.",
+  "formatted_message": "សួស្តី {{username}}, ថ្ងៃនេះគឺ {{date}}.",
+  "ui": {
+    "button_save": "រក្សាទុក",
+    "button_cancel": "បោះបង់",
+    "button_delete": "លុប"
+  },
+  "error": {
+    "not_found": "រកមិនឃើញធាតុ",
+    "invalid_input": "ការបញ្ចូលមិនត្រឹមត្រូវ"
+  }
+}

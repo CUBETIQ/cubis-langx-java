@@ -1,0 +1,47 @@
+# Changelog
+
+All notable changes to the CubisLang Java SDK will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.0] - 2026-01-05
+
+### Added
+- Initial release of CubisLang Java SDK
+- Multi-locale translation support
+- Load translations from local JSON files
+- Load translations from remote CDN/URLs
+- Automatic fallback to default locale
+- Smart caching system for remote translations
+- Encryption/decryption support for secure translations
+- Template-based formatting with positional parameters
+- Pluralization support
+- Context-aware translations
+- Keyword-based formatting (Mustache-style)
+- Event listeners for translation loaded, errors, and missing keys
+- Debug mode with comprehensive logging
+- Thread-safe translation lookups
+- Support for Console, Swing, and JavaFX applications
+- Comprehensive API with builder pattern
+- Built-in error handling and graceful degradation
+- HTTP client for remote translation fetching
+- Configurable cache duration
+- Version-based cache revalidation
+
+### Dependencies
+- Gson 2.10.1 for JSON parsing
+- SLF4J 2.0.9 for logging
+- Logback 1.4.14 for logging implementation
+- Unirest 4.4.4 for HTTP requests
+
+### Requirements
+- Java 8 or higher
+- Gradle 8.x or Maven 3.x for building
+
+### Documentation
+- Complete README with usage examples
+- API reference documentation
+- Best practices guide
+- Example implementation
+- JSON translation file format specification

@@ -1,0 +1,16 @@
+{
+  "greeting": "Hello!",
+  "Hello World!": "Hello World!",
+  "welcome_user": "Welcome, {{0}}!",
+  "item_count": "You have {{count}} items.",
+  "formatted_message": "Hello {{username}}, today is {{date}}.",
+  "ui": {
+    "button_save": "Save",
+    "button_cancel": "Cancel",
+    "button_delete": "Delete"
+  },
+  "error": {
+    "not_found": "Item not found",
+    "invalid_input": "Invalid input"
+  }
+}
