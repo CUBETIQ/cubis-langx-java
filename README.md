@@ -88,7 +88,7 @@ import com.cubetiqs.cubislang.CubisLangOptions;
 
 public class MyApp {
     public static void main(String[] args) {
-        // Initialize with options
+        // Option 1: Manual resource management
         CubisLang lang = new CubisLang(
             CubisLangOptions.builder()
                 .setDefaultLocale("en")
@@ -98,9 +98,25 @@ public class MyApp {
                 .build()
         );
 
-        // Get translation
-        String greeting = lang.get("greeting");
-        System.out.println(greeting); // Output: Hello!
+        try {
+            // Get translation
+            String greeting = lang.get("greeting");
+            System.out.println(greeting); // Output: Hello!
+        } finally {
+            // Clean up resources when done
+            lang.shutdown();
+        }
+        
+        // Option 2: Try-with-resources (recommended)
+        try (CubisLang lang2 = new CubisLang(
+            CubisLangOptions.builder()
+                .setDefaultLocale("en")
+                .setResourcePath("./resources/lang/")
+                .build()
+        )) {
+            String greeting = lang2.get("greeting");
+            System.out.println(greeting);
+        } // Automatically calls shutdown()
     }
 }
 ```
@@ -178,6 +194,42 @@ String greeting = lang.get("greeting");
 
 lang.setLocale("en"); // Switch back to English
 ```
+
+### Resource Management
+
+CubisLang implements `AutoCloseable` for proper resource cleanup:
+
+```java
+// Option 1: Try-with-resources (recommended)
+try (CubisLang lang = new CubisLang(
+    CubisLangOptions.builder()
+        .setDefaultLocale("en")
+        .setResourcePath("./resources/lang/")
+        .build()
+)) {
+    String greeting = lang.get("greeting");
+    // Resources automatically cleaned up
+}
+
+// Option 2: Manual cleanup
+CubisLang lang = new CubisLang(...);
+try {
+    String greeting = lang.get("greeting");
+} finally {
+    lang.shutdown(); // or lang.close()
+}
+```
+
+**What gets cleaned up:**
+- 🔌 HTTP client connections and thread pools
+- 💾 Translation caches
+- 🧹 Background preloader threads
+
+**When to call shutdown:**
+- ✅ Application exit
+- ✅ Servlet context destroyed
+- ✅ Spring bean destruction
+- ✅ When CubisLang is no longer needed
 
 ### Combined Locales
 
