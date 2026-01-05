@@ -107,5 +107,7 @@
   "time.last_month": "ខែមុន",
   
   "currency.symbol": "៛",
-  "currency.format": "{{amount}}{{symbol}}"
+  "currency.format": "{{amount}}{{symbol}}",
+
+  "welcome.message": "សូមស្វាគមន៍មកកាន់កម្មវិធីប្រព័ន្ធហាង!"
 }

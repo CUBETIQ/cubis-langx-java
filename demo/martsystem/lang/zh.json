@@ -107,5 +107,7 @@
   "time.last_month": "上月",
   
   "currency.symbol": "¥",
-  "currency.format": "{{symbol}}{{amount}}"
+  "currency.format": "{{symbol}}{{amount}}",
+
+  "welcome.message": "欢迎使用商店系统应用程序"
 }

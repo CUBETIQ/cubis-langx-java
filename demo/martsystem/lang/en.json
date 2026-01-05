@@ -107,5 +107,7 @@
   "time.last_month": "Last Month",
   
   "currency.symbol": "$",
-  "currency.format": "{{symbol}}{{amount}}"
+  "currency.format": "{{symbol}}{{amount}}",
+
+  "welcome.message": "Welcome to the Mart System Application!"
 }
