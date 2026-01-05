@@ -86,7 +86,10 @@ jobs:
           - ✅ Pluralization and parameter substitution
           - ✅ Context-aware and keyword-based formatting
           - ✅ Event listeners for translation loaded, errors, and missing keys
-          - ✅ Comprehensive test suite (59 tests)
+          - ✅ Combined locales - display multiple languages together
+          - ✅ Async preload locales - non-blocking background loading
+          - ✅ Resource cleanup - AutoCloseable with proper shutdown
+          - ✅ Comprehensive test suite (149 tests)
 
           ### Requirements
           - Java 8 or higher
@@ -106,15 +109,16 @@ jobs:
 
           ### Quick Start
           \`\`\`java
-          CubisLang lang = new CubisLang(
+          // Try-with-resources for automatic cleanup
+          try (CubisLang lang = new CubisLang(
               CubisLangOptions.builder()
                   .setDefaultLocale("en")
                   .setResourcePath("./resources/lang/")
                   .build()
-          );
-
-          String greeting = lang.get("greeting");
-          System.out.println(greeting);
+          )) {
+              String greeting = lang.get("greeting");
+              System.out.println(greeting);
+          }
           \`\`\`
 
           ### Documentation

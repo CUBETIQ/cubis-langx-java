@@ -7,6 +7,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,14 +28,14 @@ public class CombinedLocalesTest {
         Files.createDirectories(langDir);
 
         // Create test translation files
-        Files.writeString(langDir.resolve("en.json"),
-                "{\"greeting\": \"Hello\", \"farewell\": \"Goodbye\", \"welcome\": \"Welcome {{0}}\"}");
-        Files.writeString(langDir.resolve("km.json"),
-                "{\"greeting\": \"សួស្តី\", \"thanks\": \"អរគុណ\"}");
-        Files.writeString(langDir.resolve("zh.json"),
-                "{\"greeting\": \"你好\", \"thanks\": \"谢谢\", \"welcome\": \"欢迎 {{0}}\"}");
-        Files.writeString(langDir.resolve("fr.json"),
-                "{\"greeting\": \"Bonjour\", \"farewell\": \"Au revoir\"}");
+        Files.write(langDir.resolve("en.json"),
+                "{\"greeting\": \"Hello\", \"farewell\": \"Goodbye\", \"welcome\": \"Welcome {{0}}\"}".getBytes(StandardCharsets.UTF_8));
+        Files.write(langDir.resolve("km.json"),
+                "{\"greeting\": \"សួស្តី\", \"thanks\": \"អរគុណ\"}".getBytes(StandardCharsets.UTF_8));
+        Files.write(langDir.resolve("zh.json"),
+                "{\"greeting\": \"你好\", \"thanks\": \"谢谢\", \"welcome\": \"欢迎 {{0}}\"}".getBytes(StandardCharsets.UTF_8));
+        Files.write(langDir.resolve("fr.json"),
+                "{\"greeting\": \"Bonjour\", \"farewell\": \"Au revoir\"}".getBytes(StandardCharsets.UTF_8));
     }
 
     @Test
