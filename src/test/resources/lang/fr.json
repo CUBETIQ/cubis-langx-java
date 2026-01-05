@@ -1,0 +1,11 @@
+{
+  "greeting": "Bonjour!",
+  "farewell": "Au revoir!",
+  "welcome_user": "Bienvenue, {{0}}!",
+  "multi_param": "Bonjour {{0}}, vous avez {{1}} messages",
+  "item_count": "Vous avez {{count}} article(s)",
+  "ui.button_save": "Enregistrer",
+  "ui.button_cancel": "Annuler",
+  "formatted_message": "Bonjour {{username}}, aujourd'hui c'est {{date}}",
+  "app.title": "Application de test"
+}

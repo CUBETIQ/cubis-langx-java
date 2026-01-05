@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'com.gradleup.shadow' version '9.3.0'
 }
 
 application {
@@ -30,6 +31,19 @@ dependencies {
     
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+// create a single jar with all dependencies
+shadowJar {
+    archiveClassifier.set('all')
+    manifest {
+        attributes 'Implementation-Title': 'Cubis LangX',
+                'Implementation-Version': project.version,
+                'Implementation-Vendor': 'Cubis',
+                'Implementation-Author': 'Sambo Chea <cs@cubetiqs.com>',
+                'Java-Version': System.getProperty('java.version')
+    }
+    mergeServiceFiles()
 }
 
 test {

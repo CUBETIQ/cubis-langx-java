@@ -1,0 +1,18 @@
+{
+  "greeting": "Hello!",
+  "farewell": "Goodbye!",
+  "welcome_user": "Welcome, {{0}}!",
+  "multi_param": "Hello {{0}}, you have {{1}} messages",
+  "item_count": "You have {{count}} item(s)",
+  "user_count": "{{count}} user(s)",
+  "ui.button_save": "Save",
+  "ui.button_cancel": "Cancel",
+  "ui.button_delete": "Delete",
+  "error.not_found": "Not found",
+  "error.validation": "Validation error",
+  "formatted_message": "Hello {{username}}, today is {{date}}",
+  "profile": "{{name}} is {{age}} years old",
+  "app.title": "Test Application",
+  "menu.file": "File",
+  "menu.edit": "Edit"
+}
