@@ -6,7 +6,7 @@ import com.cubetiqs.cubislang.CubisLangOptions;
 import java.util.HashMap;
 
 /**
- * Example demonstrating the usage of CubisLang translation library.
+ * Example demonstrating the usage of CubisLang translation library with Mart System demo data.
  */
 public class HelloWorld {
     public static void main(String[] args) {
@@ -18,7 +18,7 @@ public class HelloWorld {
                 .setResourcePath("./resources/lang/") // Path to language files (/resources/lang/[locale].json)
                 .setFallbackLocale("en") // Fallback locale if translation is missing
                 .setRemoteTranslationEnabled(true) // Enable/disable remote translation fetching
-                .setRemoteTranslationUrl("https://raw.githubusercontent.com/cubetiq/poslangdata/refs/heads/main/martsystem/") // URL for remote translations (must end with a slash, e.g., GitHub raw URL)
+                .setRemoteTranslationUrl("https://raw.githubusercontent.com/CUBETIQ/cubis-langx-java/refs/heads/main/demo/martsystem/lang/") // URL for remote translations
                 .setEncryptionEnabled(false) // Enable/disable decryption for remote translation files
                 .setDecryptionKey("your-decryption-key") // Decryption key for encrypted translation files (if remote translations are encrypted)
                 .setCacheRemoteTranslations(true) // Cache remote translations locally
@@ -37,51 +37,64 @@ public class HelloWorld {
                 .build()
         );
 
-        System.out.println("\n=== CubisLang Translation Demo ===\n");
+        System.out.println("\n=== CubisLang Translation Demo - Mart System ===\n");
 
-        // Example usage
+        // Example usage - App info
+        String appTitle = lang.get("app.title");
+        System.out.println("app.title: " + appTitle);
+        
+        String appWelcome = lang.get("app.welcome");
+        System.out.println("app.welcome: " + appWelcome);
+
+        // Example usage - Basic greetings
         String greeting = lang.get("greeting");
-        System.out.println("greeting: " + greeting); // Assuming the key "greeting" exists in the translation files, if not, it will fallback to "en" locale or show key as value.
-
-        // Example with simple key
-        String farewell = lang.get("Hello World!");
-        System.out.println("Hello World!: " + farewell); // Assuming the key "Hello World!" exists in the translation files
+        System.out.println("greeting: " + greeting);
 
         // Example with formatting
-        String welcome = lang.get("welcome_user", "John"); // Assuming the key "welcome_user" has a placeholder for a name: "Welcome, {{0}}!"
+        String welcome = lang.get("welcome_user", "Samnang");
         System.out.println("welcome_user: " + welcome);
 
         // Example with pluralization
-        String itemCountOne = lang.getPlural("item_count", 1); // Assuming the key "item_count" has plural forms: "You have {{count}} item."
-        System.out.println("item_count (1): " + itemCountOne);
-        String itemCountMany = lang.getPlural("item_count", 5); // Assuming the key "item_count" has plural forms: "You have {{count}} items."
-        System.out.println("item_count (5): " + itemCountMany);
+        String itemCountOne = lang.getPlural("inventory.item_count", 1);
+        System.out.println("inventory.item_count (1): " + itemCountOne);
+        String itemCountMany = lang.getPlural("inventory.item_count", 25);
+        System.out.println("inventory.item_count (25): " + itemCountMany);
 
-        // Example with context
-        String saveButton = lang.getWithContext("button_save", "ui"); // Assuming the key "button_save" has different translations based on context
-        System.out.println("ui.button_save: " + saveButton);
+        // Example with context - UI buttons
+        String saveButton = lang.getWithContext("button.save", "ui");
+        System.out.println("ui.button.save: " + saveButton);
+        
+        String deleteButton = lang.getWithContext("button.delete", "ui");
+        System.out.println("ui.button.delete: " + deleteButton);
 
-        // Example with formatting keywords
-        String formattedMessage = lang.getWithKeywords("formatted_message", new HashMap<String, String>() {{
-            put("username", "Alice");
-            put("date", "2024-06-01");
-        }}); // Assuming the key "formatted_message" uses keywords like {{username}} and {{date}}
-        System.out.println("formatted_message: " + formattedMessage);
+        // Example with POS system
+        String posTitle = lang.get("pos.title");
+        System.out.println("pos.title: " + posTitle);
+        
+        // Example with keywords formatting
+        String reportDateRange = lang.getWithKeywords("report.date_range", new HashMap<String, String>() {{
+            put("start", "2024-01-01");
+            put("end", "2024-12-31");
+        }});
+        System.out.println("report.date_range: " + reportDateRange);
 
-        System.out.println("\n--- Changing locale to 'en' ---\n");
+        System.out.println("\n--- Changing locale to 'en' (English) ---\n");
 
-        // Change locale
+        // Change locale to English
         lang.setLocale("en");
-        String newGreeting = lang.get("greeting");
-        System.out.println("greeting: " + newGreeting);
+        String enGreeting = lang.get("greeting");
+        System.out.println("greeting: " + enGreeting);
         
-        String newWelcome = lang.get("welcome_user", "John");
-        System.out.println("welcome_user: " + newWelcome);
+        String enWelcome = lang.get("welcome_user", "John");
+        System.out.println("welcome_user: " + enWelcome);
         
-        String newSaveButton = lang.getWithContext("button_save", "ui");
-        System.out.println("ui.button_save: " + newSaveButton);
+        String enSaveButton = lang.getWithContext("button.save", "ui");
+        System.out.println("ui.button.save: " + enSaveButton);
+        
+        String enPosTitle = lang.get("pos.title");
+        System.out.println("pos.title: " + enPosTitle);
 
-        System.out.println("\n--- Changing locale to 'zh' ---\n");
+        System.out.println("\n--- Changing locale to 'zh' (Chinese) ---\n");
 
         // Change to Chinese
         lang.setLocale("zh");
@@ -90,15 +103,23 @@ public class HelloWorld {
         
         String zhWelcome = lang.get("welcome_user", "李明");
         System.out.println("welcome_user: " + zhWelcome);
+        
+        String zhAppTitle = lang.get("app.title");
+        System.out.println("app.title: " + zhAppTitle);
+        
+        String zhPosTitle = lang.get("pos.title");
+        System.out.println("pos.title: " + zhPosTitle);
 
         System.out.println("\n=== Demo Complete ===\n");
 
         // Note* 
-        // - Formatting using Mustache syntax requires the Mustache library to be included in project dependencies (com.github.spullara.mustache.java:compiler:0.9.11).
-        // - Remote translation fetching requires internet access using OkHttp HTTP client library.
-        // - Encryption/decryption requires the JCE library for cryptographic operations.
+        // - Remote translations are loaded from: https://raw.githubusercontent.com/CUBETIQ/cubis-langx-java/main/demo/martsystem/lang/
+        // - Formatting using Mustache syntax requires the Mustache library (com.github.spullara.mustache.java:compiler:0.9.11).
+        // - Remote translation fetching requires internet access using OkHttp library.
+        // - Encryption/decryption requires implementation based on your security requirements.
         // - Caching requires file I/O permissions to store cached files locally.
         // - Ensure proper error handling for production use.
-        // - Ensure this library is optimized and highly maintainable for future updates.
+        // - This library is optimized and highly maintainable for future updates.
     }
 }
+
