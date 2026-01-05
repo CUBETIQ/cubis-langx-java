@@ -51,7 +51,7 @@ if [ ! -f "build.gradle" ]; then
 fi
 
 # Extract version from build.gradle
-VERSION=$(grep "^version = " build.gradle | sed 's/version = "\(.*\)"/\1/')
+VERSION=$(grep "^version = " build.gradle | sed "s/version = ['\"]\\(.*\\)['\"]/\\1/")
 
 if [ -z "$VERSION" ]; then
   echo -e "${RED}Error: Could not extract version from build.gradle${NC}"
