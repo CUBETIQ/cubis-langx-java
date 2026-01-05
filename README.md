@@ -18,8 +18,14 @@ A powerful and flexible translation (i18n) library for Java applications includi
 -   🎧 Event listeners for loading and error handling
 -   🐛 Debug mode for development
 -   ⚡ Thread-safe and optimized for performance
+
+✨ **Auto-Translation Features:**
+
 -   🤖 **Auto-translation support** with Google Translate (free API)
 -   🔌 **Extensible adapter system** for custom translation services
+-   💨 **Built-in caching** - Dramatically improves performance
+-   ⚡ **Batch translation** - Translate multiple texts in one request
+-   🔧 **Translation file generator** - Automatically create translation files
 
 ## Installation
 

@@ -34,162 +34,191 @@ open build/reports/tests/test/index.html
 Tests core translation functionality:
 
 #### Basic Translation
-- ✅ Simple translation lookup
-- ✅ Translation with single parameter
-- ✅ Translation with multiple parameters
-- ✅ Missing key handling (returns key)
-- ✅ Null key handling
+
+-   ✅ Simple translation lookup
+-   ✅ Translation with single parameter
+-   ✅ Translation with multiple parameters
+-   ✅ Missing key handling (returns key)
+-   ✅ Null key handling
 
 #### Locale Management
-- ✅ Get current locale
-- ✅ Set locale
-- ✅ Locale switching between multiple languages
-- ✅ Rapid locale switching
+
+-   ✅ Get current locale
+-   ✅ Set locale
+-   ✅ Locale switching between multiple languages
+-   ✅ Rapid locale switching
 
 #### Context-Based Translation
-- ✅ Context-based translation lookup
-- ✅ Multiple context keys
-- ✅ Context with non-existent key
+
+-   ✅ Context-based translation lookup
+-   ✅ Multiple context keys
+-   ✅ Context with non-existent key
 
 #### Pluralization
-- ✅ Plural with single item
-- ✅ Plural with multiple items
-- ✅ Plural with zero items
+
+-   ✅ Plural with single item
+-   ✅ Plural with multiple items
+-   ✅ Plural with zero items
 
 #### Keyword Formatting
-- ✅ Keyword-based formatting with map
-- ✅ Multiple keyword values
+
+-   ✅ Keyword-based formatting with map
+-   ✅ Multiple keyword values
 
 #### Fallback Behavior
-- ✅ Fallback to default locale
-- ✅ Partial translation with fallback
-- ✅ Empty parameter handling
+
+-   ✅ Fallback to default locale
+-   ✅ Partial translation with fallback
+-   ✅ Empty parameter handling
 
 #### Consistency
-- ✅ Multiple translations in sequence
-- ✅ Translation consistency after multiple calls
-- ✅ Locale change affects all subsequent calls
+
+-   ✅ Multiple translations in sequence
+-   ✅ Translation consistency after multiple calls
+-   ✅ Locale change affects all subsequent calls
 
 ### 2. CubisLangOptionsTest (14 tests)
 
 Tests configuration builder:
 
 #### Builder Basics
-- ✅ Minimal configuration
-- ✅ Complete configuration with all options
-- ✅ Method chaining
+
+-   ✅ Minimal configuration
+-   ✅ Complete configuration with all options
+-   ✅ Method chaining
 
 #### Configuration Options
-- ✅ Fallback locale configuration
-- ✅ Remote translation settings
-- ✅ Caching configuration
-- ✅ Encryption settings
-- ✅ Debug mode
+
+-   ✅ Fallback locale configuration
+-   ✅ Remote translation settings
+-   ✅ Caching configuration
+-   ✅ Encryption settings
+-   ✅ Debug mode
 
 #### Event Listeners
-- ✅ Translation loaded listener
-- ✅ Error listener
-- ✅ Missing translation handler
-- ✅ Multiple listeners together
+
+-   ✅ Translation loaded listener
+-   ✅ Error listener
+-   ✅ Missing translation handler
+-   ✅ Multiple listeners together
 
 #### Builder Behavior
-- ✅ Default values verification
-- ✅ Builder immutability
-- ✅ Multiple builds from same builder
+
+-   ✅ Default values verification
+-   ✅ Builder immutability
+-   ✅ Multiple builds from same builder
 
 ### 3. CubisLangEventListenersTest (9 tests)
 
 Tests event handling and callbacks:
 
 #### Translation Loaded Events
-- ✅ Listener called on initialization
-- ✅ Listener called on locale change
-- ✅ Multiple locale changes trigger listener
+
+-   ✅ Listener called on initialization
+-   ✅ Listener called on locale change
+-   ✅ Multiple locale changes trigger listener
 
 #### Missing Translation Handling
-- ✅ Handler called for missing keys
-- ✅ Handler with different locales
-- ✅ Handler doesn't change return value
+
+-   ✅ Handler called for missing keys
+-   ✅ Handler with different locales
+-   ✅ Handler doesn't change return value
 
 #### Error Handling
-- ✅ Error listener not called on success
-- ✅ Listener exception doesn't break execution
+
+-   ✅ Error listener not called on success
+-   ✅ Listener exception doesn't break execution
 
 #### Combined Listeners
-- ✅ Multiple event listeners working together
-- ✅ No listeners doesn't throw exception
+
+-   ✅ Multiple event listeners working together
+-   ✅ No listeners doesn't throw exception
 
 ### 4. CubisLangIntegrationTest (12 tests)
 
 End-to-end integration tests:
 
 #### Complete Workflows
-- ✅ Complete workflow with locale changes
-- ✅ Mixed translation methods
-- ✅ Translation consistency under load
+
+-   ✅ Complete workflow with locale changes
+-   ✅ Mixed translation methods
+-   ✅ Translation consistency under load
 
 #### Caching and Performance
-- ✅ Translation cache across locale changes
-- ✅ Concurrent translation requests
-- ✅ Rapid locale switching
+
+-   ✅ Translation cache across locale changes
+-   ✅ Concurrent translation requests
+-   ✅ Rapid locale switching
 
 #### Fallback Chains
-- ✅ Fallback chain with partial translations
-- ✅ Nested context keys
-- ✅ Locale-specific formatting differences
+
+-   ✅ Fallback chain with partial translations
+-   ✅ Nested context keys
+-   ✅ Locale-specific formatting differences
 
 #### Edge Cases
-- ✅ Special character handling (Unicode)
-- ✅ Error recovery after invalid locale
-- ✅ Translation integrity after multiple operations
-- ✅ All available keys validation
+
+-   ✅ Special character handling (Unicode)
+-   ✅ Error recovery after invalid locale
+-   ✅ Translation integrity after multiple operations
+-   ✅ All available keys validation
 
 ## Test Data
 
 Test resources are located in `src/test/resources/lang/`:
 
 ### en.json (English - Complete)
+
 Contains all translation keys for comprehensive testing:
-- Basic greetings
-- Parameterized messages
-- Context-based UI strings
-- Error messages
-- Formatted messages with keywords
+
+-   Basic greetings
+-   Parameterized messages
+-   Context-based UI strings
+-   Error messages
+-   Formatted messages with keywords
 
 ### fr.json (French - Partial)
+
 Contains most translations for testing:
-- Basic translations
-- Parameterized messages
-- UI strings
-- Used to test locale switching
+
+-   Basic translations
+-   Parameterized messages
+-   UI strings
+-   Used to test locale switching
 
 ### zh.json (Chinese - Minimal)
+
 Contains limited translations:
-- Only `greeting` and `ui.button_save`
-- Specifically designed to test fallback behavior
-- Tests missing key handling
+
+-   Only `greeting` and `ui.button_save`
+-   Specifically designed to test fallback behavior
+-   Tests missing key handling
 
 ## Test Principles
 
 ### 1. Comprehensive Coverage
-- Tests cover all public API methods
-- Edge cases and error conditions tested
-- Both positive and negative test cases
+
+-   Tests cover all public API methods
+-   Edge cases and error conditions tested
+-   Both positive and negative test cases
 
 ### 2. Independence
-- Each test is independent
-- Tests can run in any order
-- No shared state between tests
+
+-   Each test is independent
+-   Tests can run in any order
+-   No shared state between tests
 
 ### 3. Clear Assertions
-- Descriptive test names
-- Clear expected vs actual values
-- Meaningful assertion messages
+
+-   Descriptive test names
+-   Clear expected vs actual values
+-   Meaningful assertion messages
 
 ### 4. Real-World Scenarios
-- Integration tests mimic actual usage
-- Tests cover common use cases
-- Performance and load testing included
+
+-   Integration tests mimic actual usage
+-   Tests cover common use cases
+-   Performance and load testing included
 
 ## Test Results
 
@@ -201,9 +230,10 @@ BUILD SUCCESSFUL
 ```
 
 ### Performance Metrics
-- Average test execution: < 2 seconds
-- No memory leaks detected
-- Thread-safe operations verified
+
+-   Average test execution: < 2 seconds
+-   No memory leaks detected
+-   Thread-safe operations verified
 
 ## Continuous Integration
 
@@ -218,8 +248,8 @@ Tests are designed to run in CI/CD pipelines:
   if: always()
   uses: actions/upload-artifact@v2
   with:
-    name: test-results
-    path: build/reports/tests/
+      name: test-results
+      path: build/reports/tests/
 ```
 
 ## Code Coverage
@@ -241,6 +271,7 @@ test {
 ```
 
 Run coverage:
+
 ```bash
 ./gradlew test jacocoTestReport
 ```
@@ -250,43 +281,50 @@ Run coverage:
 Potential additions to the test suite:
 
 1. **Remote Translation Tests**
-   - Mock HTTP server for CDN testing
-   - Network failure simulation
-   - Cache validation tests
+
+    - Mock HTTP server for CDN testing
+    - Network failure simulation
+    - Cache validation tests
 
 2. **Encryption Tests**
-   - Test decryption of encrypted files
-   - Invalid key handling
-   - Encryption format validation
+
+    - Test decryption of encrypted files
+    - Invalid key handling
+    - Encryption format validation
 
 3. **Performance Tests**
-   - Load testing with many translations
-   - Memory usage profiling
-   - Concurrent access stress tests
+
+    - Load testing with many translations
+    - Memory usage profiling
+    - Concurrent access stress tests
 
 4. **UI Framework Tests**
-   - Swing component integration
-   - JavaFX binding tests
-   - Console output validation
+    - Swing component integration
+    - JavaFX binding tests
+    - Console output validation
 
 ## Debugging Tests
 
 ### Run Single Test
+
 ```bash
 ./gradlew test --tests "CubisLangTest.testSimpleTranslation"
 ```
 
 ### Run Test Class
+
 ```bash
 ./gradlew test --tests "CubisLangTest"
 ```
 
 ### Debug Mode
+
 ```bash
 ./gradlew test --debug-jvm
 ```
 
 ### View Detailed Output
+
 ```bash
 ./gradlew test --info
 ```
@@ -301,15 +339,16 @@ Potential additions to the test suite:
 4. Add to appropriate test class
 
 Example:
+
 ```java
 @Test
 void testNewFeature() {
     // Arrange
     CubisLang lang = new CubisLang(options);
-    
+
     // Act
     String result = lang.newMethod("key");
-    
+
     // Assert
     assertEquals("expected", result);
 }
@@ -318,6 +357,7 @@ void testNewFeature() {
 ### Updating Tests
 
 When modifying functionality:
+
 1. Update affected tests
 2. Run full test suite
 3. Verify all tests pass
@@ -334,12 +374,14 @@ When modifying functionality:
 ## Troubleshooting
 
 ### Tests Fail After Code Changes
+
 1. Review the specific failing test
 2. Check if implementation changed behavior
 3. Update test expectations if intentional
 4. Fix implementation if regression
 
 ### Test Resources Not Found
+
 ```bash
 # Ensure resources are in correct location
 ls src/test/resources/lang/
@@ -349,6 +391,7 @@ ls src/test/resources/lang/
 ```
 
 ### Compilation Errors
+
 ```bash
 # Check Java version
 java -version
@@ -360,12 +403,13 @@ java -version
 ## Summary
 
 The CubisLang test suite provides comprehensive coverage of all features:
-- ✅ **59 tests** across 4 test classes
-- ✅ **100% pass rate**
-- ✅ Core functionality tested
-- ✅ Integration scenarios covered
-- ✅ Event handling validated
-- ✅ Edge cases handled
+
+-   ✅ **59 tests** across 4 test classes
+-   ✅ **100% pass rate**
+-   ✅ Core functionality tested
+-   ✅ Integration scenarios covered
+-   ✅ Event handling validated
+-   ✅ Edge cases handled
 
 The test suite ensures the library is robust, reliable, and ready for production use.
 

@@ -13,30 +13,72 @@ The base interface that all translation adapters must implement:
 ```java
 public interface TranslationAdapter {
     String translate(String text, String sourceLocale, String targetLocale);
+
+    Map<String, String> translateBatch(List<String> texts, String sourceLocale, String targetLocale);
+
     default boolean isAvailable() { return true; }
+
+    default boolean supportsBatchTranslation() { return false; }
 }
 ```
 
 ### 2. GoogleTranslateAdapter
 
-A built-in adapter that uses Google Translate's free (unofficial) API:
+A built-in adapter that uses Google Translate's free (unofficial) API with built-in caching and batch translation support:
 
 ```java
-GoogleTranslateAdapter adapter = new GoogleTranslateAdapter(10); // 10 second timeout
+// With default settings (10s timeout, caching enabled)
+GoogleTranslateAdapter adapter = new GoogleTranslateAdapter();
+
+// With custom timeout
+GoogleTranslateAdapter adapter = new GoogleTranslateAdapter(15);
+
+// With custom timeout and cache control
+GoogleTranslateAdapter adapter = new GoogleTranslateAdapter(15, true); // enable caching
 ```
 
 **Features:**
 
--   Uses Google Translate's public endpoint (no API key required)
--   Configurable timeout
--   Automatic text encoding
--   Error handling and logging
+-   ✨ **Built-in caching** - Automatically caches translations to reduce API calls
+-   ⚡ **Batch translation** - Translate multiple texts in one request for better performance
+-   🌐 Uses Google Translate's public endpoint (no API key required)
+-   ⏱️ Configurable timeout
+-   🔒 Thread-safe operations
+-   📝 Automatic text encoding
+-   🛡️ Error handling and logging
+
+**Caching:**
+
+```java
+GoogleTranslateAdapter adapter = new GoogleTranslateAdapter(10, true);
+
+// First call - fetches from API and caches
+String result1 = adapter.translate("Hello", "en", "es");
+
+// Second call - returns from cache (instant!)
+String result2 = adapter.translate("Hello", "en", "es");
+
+// Cache management
+int size = adapter.getCacheSize();
+adapter.clearCache();
+```
+
+**Batch Translation:**
+
+```java
+GoogleTranslateAdapter adapter = new GoogleTranslateAdapter();
+
+List<String> texts = Arrays.asList("Hello", "Goodbye", "Thank you");
+Map<String, String> results = adapter.translateBatch(texts, "en", "es");
+
+// Results: {"Hello": "Hola", "Goodbye": "Adiós", "Thank you": "Gracias"}
+```
 
 **Limitations:**
 
 -   Unofficial API (may be subject to rate limiting)
--   Not recommended for high-volume production use
--   Consider official Google Cloud Translation API for production
+-   Not recommended for high-volume production use without caching
+-   Consider official Google Cloud Translation API for enterprise production
 
 ### 3. Custom Adapters
 
@@ -229,34 +271,175 @@ new GoogleTranslateAdapter(OkHttpClient client) // Custom HTTP client
 
 ### Slow performance
 
--   Reduce timeout value
--   Use a faster translation service
--   Pre-translate frequently used keys
--   Implement caching in your custom adapter
+-   ✅ **Enable caching** - GoogleTranslateAdapter has built-in caching (enabled by default)
+-   Use batch translation for multiple texts
+-   Reduce timeout value for faster failures
+-   Pre-translate frequently used keys using TranslationFileGenerator
 
 ### Rate limiting issues
 
+-   ✅ **Use caching** to reduce API calls (built-in with GoogleTranslateAdapter)
+-   ✅ **Use batch translation** to reduce number of API requests
 -   Use official APIs with higher rate limits
 -   Implement exponential backoff
--   Cache translation results
--   Pre-translate in batch during build time
+-   Pre-translate in batch during build time using TranslationFileGenerator
+
+## Translation File Generator
+
+The `TranslationFileGenerator` utility helps you automatically create translation files from a source language file.
+
+### Basic Usage
+
+```java
+// Create generator with your translation adapter
+GoogleTranslateAdapter adapter = new GoogleTranslateAdapter();
+TranslationFileGenerator generator = new TranslationFileGenerator(adapter);
+
+// Generate single translation file
+generator.generateTranslationFile(
+    "./resources/lang/en.json",   // Source file
+    "en",                          // Source locale
+    "es",                          // Target locale
+    "./resources/lang/es.json"     // Output file
+);
+```
+
+### Generate Multiple Files
+
+```java
+List<String> targetLocales = Arrays.asList("fr", "de", "it", "es", "pt");
+
+Map<String, Boolean> results = generator.generateMultipleTranslationFiles(
+    "./resources/lang/en.json",
+    "en",
+    targetLocales,
+    "./resources/lang/"
+);
+
+// Check results
+for (Map.Entry<String, Boolean> entry : results.entrySet()) {
+    System.out.println(entry.getKey() + ": " +
+                      (entry.getValue() ? "✓ Success" : "✗ Failed"));
+}
+```
+
+### Batch Generation (Optimized)
+
+For better performance, use batch generation which translates all keys in one request:
+
+```java
+// Uses batch translation for all keys at once
+generator.generateTranslationFileBatch(
+    "./resources/lang/en.json",
+    "en",
+    "zh",
+    "./resources/lang/zh.json"
+);
+```
+
+### Merge with Existing Files
+
+Add missing translations to an existing file without overwriting:
+
+```java
+// Only translates keys that don't exist in km.json
+generator.mergeTranslationFile(
+    "./resources/lang/en.json",
+    "./resources/lang/km.json",
+    "en",
+    "km"
+);
+```
+
+### Features
+
+-   🌐 **Nested JSON support** - Handles complex nested structures
+-   ⚡ **Batch translation** - Optimized performance with batch operations
+-   🔄 **Merge mode** - Add missing keys without overwriting existing translations
+-   📁 **Bulk generation** - Generate multiple language files at once
+-   💾 **Automatic file creation** - Creates directories if they don't exist
+-   🎯 **Selective translation** - Choose which locales to generate
+
+### Example Output
+
+Source file `en.json`:
+
+```json
+{
+    "welcome": "Welcome",
+    "greeting": {
+        "morning": "Good morning",
+        "evening": "Good evening"
+    }
+}
+```
+
+Generated `es.json`:
+
+```json
+{
+    "welcome": "Bienvenido",
+    "greeting": {
+        "morning": "Buenos días",
+        "evening": "Buenas noches"
+    }
+}
+```
+
+## Performance Tips
+
+### 1. Use Caching
+
+Caching is enabled by default in GoogleTranslateAdapter and dramatically improves performance:
+
+```java
+GoogleTranslateAdapter adapter = new GoogleTranslateAdapter(10, true);
+
+// First call - API request
+adapter.translate("Hello", "en", "es"); // ~200ms
+
+// Subsequent calls - cached
+adapter.translate("Hello", "en", "es"); // <1ms
+```
+
+### 2. Use Batch Translation
+
+When translating multiple texts, batch translation is much faster:
+
+```java
+// Slow: Individual translations
+for (String text : texts) {
+    adapter.translate(text, "en", "es"); // N API calls
+}
+
+// Fast: Batch translation
+adapter.translateBatch(texts, "en", "es"); // 1 API call
+```
+
+### 3. Pre-generate Translation Files
+
+Instead of runtime translation, pre-generate files during build:
+
+```java
+// In your build script or initialization
+TranslationFileGenerator generator = new TranslationFileGenerator(adapter);
+generator.generateTranslationFileBatch(
+    "en.json", "en", "es", "es.json"
+);
+```
 
 ## Future Enhancements
 
 Potential improvements for future versions:
 
--   [ ] Built-in translation result caching
--   [ ] Batch translation support
+-   [x] Built-in translation result caching ✅
+-   [x] Batch translation support ✅
+-   [x] Automatic translation file generation ✅
 -   [ ] More built-in adapters (DeepL, Microsoft, AWS)
 -   [ ] Translation quality scoring
--   [ ] Automatic translation file generation
 -   [ ] Translation memory integration
-
-## License
-
-Same as CubisLang - MIT License
-
-## Support
+-   [ ] Persistent disk cache (survive application restarts)
+-   [ ] Incremental file generation (only translate new keys)
 
 For issues or questions about auto-translation:
 

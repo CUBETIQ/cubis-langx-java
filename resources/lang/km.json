@@ -2,18 +2,15 @@
   "app.title": "ប្រព័ន្ធហាង",
   "app.welcome": "សូមស្វាគមន៍មកកាន់ប្រព័ន្ធហាង",
   "app.version": "កំណែ {{version}}",
-  
   "greeting": "សួស្តី!",
   "welcome_user": "សូមស្វាគមន៍, {{0}}!",
   "goodbye": "សូមអរគុណសម្រាប់ការទិញទំនិញពីយើង!",
-  
   "menu.file": "ឯកសារ",
   "menu.edit": "កែប្រែ",
   "menu.view": "មើល",
   "menu.help": "ជំនួយ",
   "menu.settings": "ការកំណត់",
   "menu.logout": "ចាកចេញ",
-  
   "ui.button.save": "រក្សាទុក",
   "ui.button.cancel": "បោះបង់",
   "ui.button.delete": "លុប",
@@ -27,7 +24,6 @@
   "ui.button.close": "បិទ",
   "ui.button.submit": "ដាក់ស្នើ",
   "ui.button.reset": "កំណត់ឡើងវិញ",
-  
   "pos.title": "ចំណុចលក់",
   "pos.new_sale": "ការលក់ថ្មី",
   "pos.total": "សរុប: {{amount}}",
@@ -39,7 +35,6 @@
   "pos.receipt": "បង្កាន់ដៃ",
   "pos.transaction_complete": "ប្រតិបត្តិការបានបញ្ចប់",
   "pos.scan_item": "ស្កែន ឬបញ្ចូលលេខកូដទំនិញ",
-  
   "product.name": "ឈ្មោះទំនិញ",
   "product.code": "លេខកូដទំនិញ",
   "product.price": "តំលៃ",
@@ -52,21 +47,18 @@
   "product.add_success": "បានបន្ថែមទំនិញដោយជោគជ័យ",
   "product.update_success": "បានកែប្រែទំនិញដោយជោគជ័យ",
   "product.delete_success": "បានលុបទំនិញដោយជោគជ័យ",
-  
   "customer.name": "ឈ្មោះអតិថិជន",
   "customer.phone": "លេខទូរស័ព្ទ",
   "customer.email": "អាសយដ្ឋានអ៊ីមែល",
   "customer.address": "អាសយដ្ឋាន",
   "customer.loyalty_points": "ពិន្ទុភក្តីភាព: {{points}}",
   "customer.total_purchases": "ការទិញសរុប: {{amount}}",
-  
   "inventory.title": "ការគ្រប់គ្រងស្តុក",
   "inventory.item_count": "អ្នកមាន {{count}} ធាតុ",
   "inventory.low_stock_alert": "មានទំនិញ {{count}} ដែលកំពុងស្ថិតក្នុងស្ថានភាពស្តុកទាប",
   "inventory.reorder_level": "កម្រិតបញ្ជាទិញឡើងវិញ",
   "inventory.stock_in": "ស្តុកចូល",
   "inventory.stock_out": "ស្តុកចេញ",
-  
   "report.title": "របាយការណ៍",
   "report.daily_sales": "របាយការណ៍លក់ប្រចាំថ្ងៃ",
   "report.monthly_sales": "របាយការណ៍លក់ប្រចាំខែ",
@@ -74,7 +66,6 @@
   "report.customer_report": "របាយការណ៍អតិថិជន",
   "report.generate": "បង្កើតរបាយការណ៍",
   "report.date_range": "ជួរកាលបរិច្ឆេទ: {{start}} ដល់ {{end}}",
-  
   "error.network": "កំហុសបណ្តាញបានកើតឡើង",
   "error.not_found": "រកមិនឃើញធាតុ",
   "error.validation": "កំហុសក្នុងការផ្ទៀងផ្ទាត់",
@@ -82,30 +73,25 @@
   "error.invalid_input": "ការបញ្ចូលមិនត្រឹមត្រូវ",
   "error.insufficient_stock": "ស្តុកមិនគ្រប់គ្រាន់",
   "error.payment_failed": "ការទូទាត់បានបរាជ័យ",
-  
   "message.success": "ប្រតិបត្តិការបានបញ្ចប់ដោយជោគជ័យ",
   "message.confirm_delete": "តើអ្នកប្រាកដថាចង់លុបធាតុនេះទេ?",
   "message.save_changes": "តើអ្នកចង់រក្សាទុកការផ្លាស់ប្តូរទេ?",
   "message.loading": "កំពុងផ្ទុក...",
   "message.processing": "កំពុងដំណើរការ...",
   "message.no_data": "គ្មានទិន្នន័យ",
-  
   "notification.new_order": "បានទទួលការបញ្ជាទិញថ្មី",
   "notification.low_stock": "ការជូនដំណឹងស្តុកទាបសម្រាប់ {{product}}",
   "notification.sale_complete": "ការលក់បានបញ្ចប់ដោយជោគជ័យ",
-  
   "status.active": "សកម្ម",
   "status.inactive": "អសកម្ម",
   "status.pending": "កំពុងរង់ចាំ",
   "status.completed": "បានបញ្ចប់",
   "status.cancelled": "បានបោះបង់",
-  
   "time.today": "ថ្ងៃនេះ",
   "time.yesterday": "ម្សិលមិញ",
   "time.this_week": "សប្តាហ៍នេះ",
   "time.this_month": "ខែនេះ",
   "time.last_month": "ខែមុន",
-  
   "currency.symbol": "៛",
   "currency.format": "{{amount}}{{symbol}}"
 }

@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,12 +30,14 @@ public class GoogleTranslateAdapter implements TranslationAdapter {
     
     private final OkHttpClient httpClient;
     private final int timeout;
+    private final TranslationCache cache;
+    private final boolean cacheEnabled;
     
     /**
-     * Create a new Google Translate adapter with default timeout (10 seconds).
+     * Create a new Google Translate adapter with default timeout (10 seconds) and caching enabled.
      */
     public GoogleTranslateAdapter() {
-        this(10);
+        this(10, true);
     }
     
     /**
@@ -41,12 +46,24 @@ public class GoogleTranslateAdapter implements TranslationAdapter {
      * @param timeoutSeconds Timeout in seconds for translation requests
      */
     public GoogleTranslateAdapter(int timeoutSeconds) {
+        this(timeoutSeconds, true);
+    }
+    
+    /**
+     * Create a new Google Translate adapter with custom timeout and cache control.
+     * 
+     * @param timeoutSeconds Timeout in seconds for translation requests
+     * @param enableCache Whether to enable translation caching
+     */
+    public GoogleTranslateAdapter(int timeoutSeconds, boolean enableCache) {
         this.timeout = timeoutSeconds;
         this.httpClient = new OkHttpClient.Builder()
                 .connectTimeout(timeoutSeconds, TimeUnit.SECONDS)
                 .readTimeout(timeoutSeconds, TimeUnit.SECONDS)
                 .writeTimeout(timeoutSeconds, TimeUnit.SECONDS)
                 .build();
+        this.cacheEnabled = enableCache;
+        this.cache = enableCache ? new TranslationCache(24, 1000) : null;
     }
     
     /**
@@ -55,8 +72,20 @@ public class GoogleTranslateAdapter implements TranslationAdapter {
      * @param httpClient Custom OkHttpClient instance
      */
     public GoogleTranslateAdapter(OkHttpClient httpClient) {
+        this(httpClient, true);
+    }
+    
+    /**
+     * Create a Google Translate adapter with a custom OkHttpClient and cache control.
+     * 
+     * @param httpClient Custom OkHttpClient instance
+     * @param enableCache Whether to enable translation caching
+     */
+    public GoogleTranslateAdapter(OkHttpClient httpClient, boolean enableCache) {
         this.httpClient = httpClient;
         this.timeout = 10;
+        this.cacheEnabled = enableCache;
+        this.cache = enableCache ? new TranslationCache(24, 1000) : null;
     }
     
     @Override
@@ -74,6 +103,71 @@ public class GoogleTranslateAdapter implements TranslationAdapter {
         if (sourceLocale.equals(targetLocale)) {
             return text;
         }
+        
+        // Check cache first
+        if (cacheEnabled) {
+            String cached = cache.get(text, sourceLocale, targetLocale);
+            if (cached != null) {
+                logger.debug("Cache hit for: {}", text);
+                return cached;
+            }
+        }
+        
+        // Translate and cache result
+        String translation = performTranslation(text, sourceLocale, targetLocale);
+        
+        if (translation != null && cacheEnabled) {
+            cache.put(text, sourceLocale, targetLocale, translation);
+        }
+        
+        return translation;
+    }
+    
+    @Override
+    public Map<String, String> translateBatch(List<String> texts, String sourceLocale, String targetLocale) {
+        Map<String, String> results = new LinkedHashMap<>();
+        
+        if (texts == null || texts.isEmpty()) {
+            return results;
+        }
+        
+        for (String text : texts) {
+            if (text == null || text.trim().isEmpty()) {
+                results.put(text, text);
+                continue;
+            }
+            
+            // Check cache first
+            String cached = null;
+            if (cacheEnabled) {
+                cached = cache.get(text, sourceLocale, targetLocale);
+            }
+            
+            if (cached != null) {
+                results.put(text, cached);
+            } else {
+                // Translate and cache
+                String translation = performTranslation(text, sourceLocale, targetLocale);
+                results.put(text, translation);
+                
+                if (translation != null && cacheEnabled) {
+                    cache.put(text, sourceLocale, targetLocale, translation);
+                }
+            }
+        }
+        
+        return results;
+    }
+    
+    /**
+     * Performs the actual translation via HTTP request.
+     * 
+     * @param text Text to translate
+     * @param sourceLocale Source locale
+     * @param targetLocale Target locale
+     * @return Translated text or null if translation fails
+     */
+    private String performTranslation(String text, String sourceLocale, String targetLocale) {
         
         try {
             String encodedText = URLEncoder.encode(text, StandardCharsets.UTF_8.toString());
@@ -150,5 +244,32 @@ public class GoogleTranslateAdapter implements TranslationAdapter {
             logger.warn("Google Translate adapter availability check failed: {}", e.getMessage());
             return false;
         }
+    }
+    
+    /**
+     * Clears the translation cache.
+     */
+    public void clearCache() {
+        if (cacheEnabled && cache != null) {
+            cache.clear();
+        }
+    }
+    
+    /**
+     * Gets the current cache size.
+     * 
+     * @return Number of cached translations, or 0 if cache is disabled
+     */
+    public int getCacheSize() {
+        return (cacheEnabled && cache != null) ? cache.size() : 0;
+    }
+    
+    /**
+     * Cleans up expired cache entries.
+     * 
+     * @return Number of entries removed
+     */
+    public int cleanupCache() {
+        return (cacheEnabled && cache != null) ? cache.cleanupExpired() : 0;
     }
 }
