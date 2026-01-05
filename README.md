@@ -19,6 +19,7 @@ A powerful and flexible translation (i18n) library for Java applications includi
 -   🐛 Debug mode for development
 -   ⚡ Thread-safe and optimized for performance
 -   🌐 **Combined locales** - Display multiple languages in one result
+-   🚀 **Async locale preloading** - Non-blocking background loading for faster access
 
 ✨ **Auto-Translation Features:**
 
@@ -103,6 +104,29 @@ public class MyApp {
     }
 }
 ```
+
+### 3. Preload Locales for Faster Access (Optional)
+
+For better performance, preload locales asynchronously on startup:
+
+```java
+CubisLang lang = new CubisLang(
+    CubisLangOptions.builder()
+        .setDefaultLocale("en")
+        .setResourcePath("./resources/lang/")
+        .setPreloadLocales(Arrays.asList("km", "zh", "fr"))
+        .build()
+);
+
+// Constructor returns immediately (non-blocking)
+// Locales load in the background for faster access later
+```
+
+**Benefits:**
+- ⚡ **Non-blocking** - Constructor returns immediately
+- 🚀 **Faster switching** - Preloaded locales are instantly available
+- 🎯 **Optimized startup** - Load what you need in the background
+- 💾 **Smart caching** - Skips already-loaded locales
 
 ## Usage Examples
 

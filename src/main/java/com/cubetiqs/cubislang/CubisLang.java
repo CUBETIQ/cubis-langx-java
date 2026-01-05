@@ -62,6 +62,45 @@ public class CubisLang {
         if (options.getFallbackLocale() != null && !options.getFallbackLocale().equals(currentLocale)) {
             loadTranslations(options.getFallbackLocale());
         }
+        
+        // Preload locales asynchronously (non-blocking)
+        preloadLocalesAsync();
+    }
+
+    /**
+     * Preloads specified locales asynchronously in the background.
+     * This method returns immediately without blocking.
+     */
+    private void preloadLocalesAsync() {
+        List<String> preloadLocales = options.getPreloadLocales();
+        
+        if (preloadLocales == null || preloadLocales.isEmpty()) {
+            return;
+        }
+        
+        // Start async loading in a background thread
+        new Thread(() -> {
+            for (String locale : preloadLocales) {
+                // Skip if already loaded
+                if (translations.containsKey(locale)) {
+                    if (options.isDebugMode()) {
+                        logger.info("Locale '{}' already loaded, skipping preload", locale);
+                    }
+                    continue;
+                }
+                
+                try {
+                    if (options.isDebugMode()) {
+                        logger.info("Preloading locale: {}", locale);
+                    }
+                    loadTranslations(locale);
+                } catch (Exception e) {
+                    if (options.isDebugMode()) {
+                        logger.error("Error preloading locale: " + locale, e);
+                    }
+                }
+            }
+        }, "CubisLang-Preloader").start();
     }
 
     /**

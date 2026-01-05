@@ -8,6 +8,7 @@ public class HelloWorld {
         CubisLang lang = new CubisLang(
             CubisLangOptions.builder()
                 .setDefaultLocale("km") // km, en, zh
+                .setPreloadLocales(Arrays.asList("en", "km")) // Preload these locales on startup for faster access
                 .setResourcePath("./resources/lang/") // Path to language files (/resources/lang/[locale].json)
                 .setFallbackLocale("en") // Fallback locale if translation is missing
                 .setRemoteTranslationEnabled(true) // Enable/disable remote translation fetching

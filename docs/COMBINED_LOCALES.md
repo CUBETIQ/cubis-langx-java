@@ -144,7 +144,34 @@ String welcome = lang.get("welcome", "John");
 // Output: Welcome John / 欢迎 John
 ```
 
-### 2. Direct Method Call
+### 2. Preload Combined Locales for Better Performance
+
+When using combined locales, preload them for instant access:
+
+```java
+CubisLang lang = new CubisLang(
+    CubisLangOptions.builder()
+        .setDefaultLocale("en")
+        .setCombineLocales(Arrays.asList("en", "km", "zh"))
+        .setCombineSeparator(" / ")
+        .setPreloadLocales(Arrays.asList("km", "zh"))  // Preload non-default locales
+        .build()
+);
+
+// Constructor returns immediately (non-blocking)
+// km and zh load in background
+// First get() may use cached or wait briefly, subsequent calls are instant
+
+String greeting = lang.get("greeting");
+// Output: Hello / សួស្តី / 你好
+```
+
+**Benefits:**
+- ⚡ Faster first access to combined translations
+- 🚀 Non-blocking initialization
+- 💾 Smart: skips already-loaded locales
+
+### 3. Direct Method Call
 
 You can also call `getCombined()` directly:
 

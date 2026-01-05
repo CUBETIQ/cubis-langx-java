@@ -26,6 +26,7 @@ public class CubisLangOptions {
     private Boolean combineLocalesEnabled = null; // default: depends on whether combineLocales is set
     private final List<String> combineLocales;
     private final String combineSeparator;
+    private final List<String> preloadLocales;
 
     private CubisLangOptions(Builder builder) {
         this.defaultLocale = builder.defaultLocale;
@@ -48,6 +49,7 @@ public class CubisLangOptions {
         this.combineLocalesEnabled = builder.combineLocalesEnabled;
         this.combineLocales = builder.combineLocales;
         this.combineSeparator = builder.combineSeparator;
+        this.preloadLocales = builder.preloadLocales;
     }
 
     public static Builder builder() {
@@ -79,6 +81,7 @@ public class CubisLangOptions {
      }
     public List<String> getCombineLocales() { return combineLocales; }
     public String getCombineSeparator() { return combineSeparator; }
+    public List<String> getPreloadLocales() { return preloadLocales; }
 
     /**
      * Builder class for CubisLangOptions.
@@ -103,6 +106,7 @@ public class CubisLangOptions {
         private Boolean combineLocalesEnabled = null; // default: depends on whether combineLocales is set
         private List<String> combineLocales = null;
         private String combineSeparator = " / ";
+        private List<String> preloadLocales = null;
 
         public Builder setDefaultLocale(String defaultLocale) {
             this.defaultLocale = defaultLocale;
@@ -196,6 +200,11 @@ public class CubisLangOptions {
 
         public Builder setCombineSeparator(String combineSeparator) {
             this.combineSeparator = combineSeparator;
+            return this;
+        }
+
+        public Builder setPreloadLocales(List<String> preloadLocales) {
+            this.preloadLocales = preloadLocales;
             return this;
         }
 
