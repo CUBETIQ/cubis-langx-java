@@ -57,8 +57,13 @@ public class CubisLang {
         this.gson = new Gson();
         this.mustacheFactory = new DefaultMustacheFactory();
         
-        // Load initial translations
+        // Load initial translations for current locale
         loadTranslations(currentLocale);
+        
+        // Also load fallback locale if it's different from current locale
+        if (options.getFallbackLocale() != null && !options.getFallbackLocale().equals(currentLocale)) {
+            loadTranslations(options.getFallbackLocale());
+        }
     }
 
     /**
@@ -246,7 +251,59 @@ public class CubisLang {
             }
         }
         
+        // Auto-translate if enabled and adapter is available
+        if (options.isAutoTranslateEnabled() && options.getTranslationAdapter() != null) {
+            return autoTranslate(locale, key);
+        }
+        
         return null;
+    }
+    
+    /**
+     * Auto-translates a key using the configured translation adapter.
+     * First tries to get the value from the fallback locale, then translates it to the target locale.
+     * 
+     * @param targetLocale the target locale to translate to
+     * @param key the translation key
+     * @return the auto-translated text, or null if translation fails
+     */
+    private String autoTranslate(String targetLocale, String key) {
+        TranslationAdapter adapter = options.getTranslationAdapter();
+        
+        if (adapter == null || !adapter.isAvailable()) {
+            return null;
+        }
+        
+        // Get the text from fallback locale
+        String fallbackLocale = options.getFallbackLocale();
+        JsonObject fallbackTranslations = translations.get(fallbackLocale);
+        
+        if (fallbackTranslations == null) {
+            return null;
+        }
+        
+        JsonElement element = getNestedValue(fallbackTranslations, key);
+        if (element == null || !element.isJsonPrimitive()) {
+            return null;
+        }
+        
+        String sourceText = element.getAsString();
+        
+        try {
+            String translated = adapter.translate(sourceText, fallbackLocale, targetLocale);
+            
+            if (translated != null && options.isDebugMode()) {
+                logger.info("Auto-translated '{}' from {} to {}: {} -> {}", 
+                        key, fallbackLocale, targetLocale, sourceText, translated);
+            }
+            
+            return translated;
+        } catch (Exception e) {
+            if (options.isDebugMode()) {
+                logger.error("Auto-translation failed for key: " + key, e);
+            }
+            return null;
+        }
     }
 
     private JsonElement getNestedValue(JsonObject obj, String key) {

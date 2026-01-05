@@ -18,6 +18,8 @@ A powerful and flexible translation (i18n) library for Java applications includi
 -   🎧 Event listeners for loading and error handling
 -   🐛 Debug mode for development
 -   ⚡ Thread-safe and optimized for performance
+-   🤖 **Auto-translation support** with Google Translate (free API)
+-   🔌 **Extensible adapter system** for custom translation services
 
 ## Installation
 
@@ -148,6 +150,70 @@ lang.setLocale("en"); // Switch back to English
 
 ## Advanced Configuration
 
+### Auto-Translation with Google Translate
+
+Automatically translate missing keys using Google Translate's free API:
+
+```java
+import com.cubetiqs.cubislang.GoogleTranslateAdapter;
+
+CubisLang lang = new CubisLang(
+    CubisLangOptions.builder()
+        .setDefaultLocale("km") // Khmer as primary
+        .setFallbackLocale("en") // English as fallback
+        .setResourcePath("./resources/lang/")
+        .setAutoTranslateEnabled(true)
+        .setTranslationAdapter(new GoogleTranslateAdapter(10)) // 10 second timeout
+        .build()
+);
+
+// If "farewell" doesn't exist in Khmer, it will auto-translate from English
+String farewell = lang.get("farewell");
+// Output: លាហើយ! (automatically translated from "Goodbye!")
+```
+
+**How it works:**
+
+1. Looks for the key in the current locale (km)
+2. If not found, looks in the fallback locale (en)
+3. If found in fallback, **returns the fallback value directly** (no translation)
+4. If auto-translation is enabled and the key exists in fallback, you get the fallback text
+5. Auto-translation is most useful when you want on-demand translation without pre-creating translation files
+
+**Note:** This uses Google Translate's unofficial/free API. For production use with high volume, consider using the official Google Cloud Translation API or other translation services.
+
+### Custom Translation Adapter
+
+Create your own translation adapter for any translation service:
+
+```java
+import com.cubetiqs.cubislang.TranslationAdapter;
+
+public class MyCustomAdapter implements TranslationAdapter {
+    @Override
+    public String translate(String text, String sourceLocale, String targetLocale) {
+        // Call your translation API (Microsoft Translator, DeepL, AWS Translate, etc.)
+        // For example, using Microsoft Translator:
+        return callMicrosoftTranslator(text, sourceLocale, targetLocale);
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return true; // Check if your service is available
+    }
+}
+
+// Use your custom adapter
+CubisLang lang = new CubisLang(
+    CubisLangOptions.builder()
+        .setAutoTranslateEnabled(true)
+        .setTranslationAdapter(new MyCustomAdapter())
+        .build()
+);
+```
+
+See [CustomTranslationAdapter.java](src/main/java/com/cubetiqs/cubislang/example/CustomTranslationAdapter.java) for a complete example.
+
 ### Remote Translation Loading
 
 Load translations from a CDN or remote URL:
@@ -210,19 +276,21 @@ CubisLang lang = new CubisLang(
 
 ## Configuration Options
 
-| Option                     | Type    | Default                   | Description                                 |
-| -------------------------- | ------- | ------------------------- | ------------------------------------------- |
-| `defaultLocale`            | String  | "en"                      | Default locale to use                       |
-| `resourcePath`             | String  | "./resources/lang/"       | Path to local translation files             |
-| `fallbackLocale`           | String  | "en"                      | Fallback locale when translation is missing |
-| `remoteTranslationEnabled` | boolean | false                     | Enable remote translation fetching          |
-| `remoteTranslationUrl`     | String  | null                      | Base URL for remote translations            |
-| `encryptionEnabled`        | boolean | false                     | Enable decryption for remote files          |
-| `decryptionKey`            | String  | null                      | Decryption key (AES)                        |
-| `cacheRemoteTranslations`  | boolean | true                      | Cache remote translations locally           |
-| `cacheDurationHours`       | int     | 24                        | Cache validity duration                     |
-| `cachePath`                | String  | "./resources/cache/lang/" | Cache storage path                          |
-| `debugMode`                | boolean | false                     | Enable debug logging                        |
+| Option                     | Type    | Default                   | Description                                        |
+| -------------------------- | ------- | ------------------------- | -------------------------------------------------- |
+| `defaultLocale`            | String  | "en"                      | Default locale to use                              |
+| `resourcePath`             | String  | "./resources/lang/"       | Path to local translation files                    |
+| `fallbackLocale`           | String  | "en"                      | Fallback locale when translation is missing        |
+| `remoteTranslationEnabled` | boolean | false                     | Enable remote translation fetching                 |
+| `remoteTranslationUrl`     | String  | null                      | Base URL for remote translations                   |
+| `encryptionEnabled`        | boolean | false                     | Enable decryption for remote files                 |
+| `decryptionKey`            | String  | null                      | Decryption key (AES)                               |
+| `cacheRemoteTranslations`  | boolean | true                      | Cache remote translations locally                  |
+| `cacheDurationHours`       | int     | 24                        | Cache validity duration                            |
+| `cachePath`                | String  | "./resources/cache/lang/" | Cache storage path                                 |
+| `debugMode`                | boolean | false                     | Enable debug logging                               |
+| `autoTranslateEnabled`     | boolean | false                     | Enable auto-translation for missing keys           |
+| `translationAdapter`       | Object  | null                      | Translation adapter (e.g., GoogleTranslateAdapter) |
 
 ## JSON Translation Format
 

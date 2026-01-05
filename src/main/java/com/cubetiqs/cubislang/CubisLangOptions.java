@@ -19,6 +19,8 @@ public class CubisLangOptions {
     private final TranslationLoadedListener onTranslationLoadedListener;
     private final TranslationErrorListener onTranslationErrorListener;
     private final MissingTranslationHandler missingTranslationHandler;
+    private final boolean autoTranslateEnabled;
+    private final TranslationAdapter translationAdapter;
 
     private CubisLangOptions(Builder builder) {
         this.defaultLocale = builder.defaultLocale;
@@ -35,6 +37,8 @@ public class CubisLangOptions {
         this.onTranslationLoadedListener = builder.onTranslationLoadedListener;
         this.onTranslationErrorListener = builder.onTranslationErrorListener;
         this.missingTranslationHandler = builder.missingTranslationHandler;
+        this.autoTranslateEnabled = builder.autoTranslateEnabled;
+        this.translationAdapter = builder.translationAdapter;
     }
 
     public static Builder builder() {
@@ -56,6 +60,8 @@ public class CubisLangOptions {
     public TranslationLoadedListener getOnTranslationLoadedListener() { return onTranslationLoadedListener; }
     public TranslationErrorListener getOnTranslationErrorListener() { return onTranslationErrorListener; }
     public MissingTranslationHandler getMissingTranslationHandler() { return missingTranslationHandler; }
+    public boolean isAutoTranslateEnabled() { return autoTranslateEnabled; }
+    public TranslationAdapter getTranslationAdapter() { return translationAdapter; }
 
     /**
      * Builder class for CubisLangOptions.
@@ -75,6 +81,8 @@ public class CubisLangOptions {
         private TranslationLoadedListener onTranslationLoadedListener = null;
         private TranslationErrorListener onTranslationErrorListener = null;
         private MissingTranslationHandler missingTranslationHandler = null;
+        private boolean autoTranslateEnabled = false;
+        private TranslationAdapter translationAdapter = null;
 
         public Builder setDefaultLocale(String defaultLocale) {
             this.defaultLocale = defaultLocale;
@@ -143,6 +151,16 @@ public class CubisLangOptions {
 
         public Builder setMissingTranslationHandler(MissingTranslationHandler handler) {
             this.missingTranslationHandler = handler;
+            return this;
+        }
+
+        public Builder setAutoTranslateEnabled(boolean autoTranslateEnabled) {
+            this.autoTranslateEnabled = autoTranslateEnabled;
+            return this;
+        }
+
+        public Builder setTranslationAdapter(TranslationAdapter translationAdapter) {
+            this.translationAdapter = translationAdapter;
             return this;
         }
 

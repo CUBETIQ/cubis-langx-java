@@ -119,8 +119,8 @@ jobs:
 
           ### Documentation
           - [README](https://github.com/CUBETIQ/cubis-langx-java#readme)
-          - [Usage Guide](https://github.com/CUBETIQ/cubis-langx-java/blob/main/USAGE_GUIDE.md)
-          - [Quick Reference](https://github.com/CUBETIQ/cubis-langx-java/blob/main/QUICK_REFERENCE.md)
+          - [Usage Guide](https://github.com/CUBETIQ/cubis-langx-java/blob/main/docs/USAGE_GUIDE.md)
+          - [Quick Reference](https://github.com/CUBETIQ/cubis-langx-java/blob/main/docs/QUICK_REFERENCE.md)
 
           ### Changes
           See the [commit history](https://github.com/CUBETIQ/cubis-langx-java/commits/${{ steps.tag_name.outputs.TAG }}) for detailed changes.
