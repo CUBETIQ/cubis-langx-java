@@ -20,6 +20,8 @@ A powerful and flexible translation (i18n) library for Java applications includi
 -   ⚡ Thread-safe and optimized for performance
 -   🌐 **Combined locales** - Display multiple languages in one result
 -   🚀 **Async locale preloading** - Non-blocking background loading for faster access
+-   🔍 **Missing keys extraction** - Identify and extract untranslated keys across locales
+-   🧹 **Resource cleanup** - AutoCloseable with proper shutdown
 
 ✨ **Auto-Translation Features:**
 
@@ -106,7 +108,7 @@ public class MyApp {
             // Clean up resources when done
             lang.shutdown();
         }
-        
+
         // Option 2: Try-with-resources (recommended)
         try (CubisLang lang2 = new CubisLang(
             CubisLangOptions.builder()
@@ -139,10 +141,11 @@ CubisLang lang = new CubisLang(
 ```
 
 **Benefits:**
-- ⚡ **Non-blocking** - Constructor returns immediately
-- 🚀 **Faster switching** - Preloaded locales are instantly available
-- 🎯 **Optimized startup** - Load what you need in the background
-- 💾 **Smart caching** - Skips already-loaded locales
+
+-   ⚡ **Non-blocking** - Constructor returns immediately
+-   🚀 **Faster switching** - Preloaded locales are instantly available
+-   🎯 **Optimized startup** - Load what you need in the background
+-   💾 **Smart caching** - Skips already-loaded locales
 
 ## Usage Examples
 
@@ -221,15 +224,17 @@ try {
 ```
 
 **What gets cleaned up:**
-- 🔌 HTTP client connections and thread pools
-- 💾 Translation caches
-- 🧹 Background preloader threads
+
+-   🔌 HTTP client connections and thread pools
+-   💾 Translation caches
+-   🧹 Background preloader threads
 
 **When to call shutdown:**
-- ✅ Application exit
-- ✅ Servlet context destroyed
-- ✅ Spring bean destruction
-- ✅ When CubisLang is no longer needed
+
+-   ✅ Application exit
+-   ✅ Servlet context destroyed
+-   ✅ Spring bean destruction
+-   ✅ When CubisLang is no longer needed
 
 ### Combined Locales
 
@@ -448,6 +453,53 @@ CubisLang lang = new CubisLang(
     "message": "Hello {{username}}, you have {{count}} messages."
 }
 ```
+
+### Extract Missing Keys
+
+Identify and extract missing translation keys - useful for maintaining translations across multiple locales:
+
+```java
+import com.google.gson.JsonObject;
+import java.util.Map;
+import java.util.Set;
+
+try (CubisLang lang = new CubisLang(
+    CubisLangOptions.builder()
+        .setDefaultLocale("en")
+        .setResourcePath("./resources/lang/")
+        .build()
+)) {
+    // Load the locales you want to compare
+    lang.setLocale("en");
+    lang.setLocale("fr");
+
+    // Find which keys are missing in French
+    Set<String> missingKeys = lang.findMissingKeys("en", "fr");
+    System.out.println("Missing keys: " + missingKeys);
+    // Output: [farewell, thanks, ui.button.cancel]
+
+    // Get missing keys with their English values (as a template)
+    Map<String, String> missingWithValues = lang.extractMissingKeysWithValues("en", "fr");
+    System.out.println("Missing translations:");
+    missingWithValues.forEach((key, value) ->
+        System.out.println(key + " = " + value + " [NEEDS TRANSLATION]")
+    );
+
+    // Extract as JSON preserving nested structure
+    JsonObject missingJson = lang.extractMissingKeysAsJson("en", "fr");
+    System.out.println(missingJson);
+    // Can be saved to a file for translators:
+    // Files.write(Paths.get("missing_fr.json"),
+    //     new Gson().toJson(missingJson).getBytes());
+}
+```
+
+**Practical use cases:**
+
+-   📋 Generate translation task lists for translators
+-   🔍 Audit which locales need updates
+-   📝 Create template files with missing keys
+-   ✅ CI/CD checks to ensure all locales are complete
 
 ## Use Cases
 

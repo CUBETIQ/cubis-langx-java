@@ -405,6 +405,110 @@ public class CubisLang implements AutoCloseable {
         return isShutdown;
     }
 
+    /**
+     * Gets all translation keys from a specific locale.
+     * Supports nested keys using dot notation (e.g., "ui.button.save").
+     *
+     * @param locale the locale to extract keys from
+     * @return set of all translation keys, or empty set if locale not loaded
+     */
+    public Set<String> getAllKeys(String locale) {
+        JsonObject localeTranslations = translations.get(locale);
+        if (localeTranslations == null) {
+            return Collections.emptySet();
+        }
+
+        Set<String> keys = new HashSet<>();
+        extractKeys(localeTranslations, "", keys);
+        return keys;
+    }
+
+    /**
+     * Finds missing translation keys by comparing a target locale against a reference locale.
+     * This is useful for identifying which keys need to be translated.
+     *
+     * @param referenceLocale the locale to use as reference (e.g., "en")
+     * @param targetLocale    the locale to check for missing keys (e.g., "fr")
+     * @return set of keys that exist in reference but are missing in target
+     */
+    public Set<String> findMissingKeys(String referenceLocale, String targetLocale) {
+        Set<String> referenceKeys = getAllKeys(referenceLocale);
+        Set<String> targetKeys = getAllKeys(targetLocale);
+
+        Set<String> missingKeys = new HashSet<>(referenceKeys);
+        missingKeys.removeAll(targetKeys);
+
+        if (options.isDebugMode()) {
+            logger.info("Found {} missing keys in locale '{}' compared to '{}'",
+                    missingKeys.size(), targetLocale, referenceLocale);
+        }
+
+        return missingKeys;
+    }
+
+    /**
+     * Extracts missing keys with their values from the reference locale.
+     * Returns a map that can be used as a template for translation.
+     *
+     * @param referenceLocale the locale to use as reference (e.g., "en")
+     * @param targetLocale    the locale to check for missing keys (e.g., "fr")
+     * @return map of missing keys with their reference locale values
+     */
+    public Map<String, String> extractMissingKeysWithValues(String referenceLocale, String targetLocale) {
+        Set<String> missingKeys = findMissingKeys(referenceLocale, targetLocale);
+        Map<String, String> result = new LinkedHashMap<>();
+
+        JsonObject referenceTranslations = translations.get(referenceLocale);
+        if (referenceTranslations == null) {
+            return result;
+        }
+
+        for (String key : missingKeys) {
+            JsonElement element = getNestedValue(referenceTranslations, key);
+            if (element != null && element.isJsonPrimitive()) {
+                result.put(key, element.getAsString());
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Extracts missing keys and creates a JSON object structure matching the reference locale.
+     * This preserves the nested structure of the original JSON.
+     *
+     * @param referenceLocale the locale to use as reference (e.g., "en")
+     * @param targetLocale    the locale to check for missing keys (e.g., "fr")
+     * @return JsonObject containing missing keys in their original nested structure
+     */
+    public JsonObject extractMissingKeysAsJson(String referenceLocale, String targetLocale) {
+        Set<String> missingKeys = findMissingKeys(referenceLocale, targetLocale);
+        JsonObject result = new JsonObject();
+
+        JsonObject referenceTranslations = translations.get(referenceLocale);
+        if (referenceTranslations == null) {
+            return result;
+        }
+
+        for (String key : missingKeys) {
+            JsonElement element = getNestedValue(referenceTranslations, key);
+            if (element != null) {
+                addNestedValue(result, key, element);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Gets all loaded locales.
+     *
+     * @return set of locale codes that are currently loaded
+     */
+    public Set<String> getLoadedLocales() {
+        return new HashSet<>(translations.keySet());
+    }
+
     // Private helper methods
     private String getTranslation(String locale, String key) {
         JsonObject localeTranslations = translations.get(locale);
@@ -503,6 +607,62 @@ public class CubisLang implements AutoCloseable {
         }
 
         return current.get(parts[parts.length - 1]);
+    }
+
+    /**
+     * Recursively extracts all keys from a JsonObject, including nested keys.
+     * 
+     * @param obj    the JsonObject to extract keys from
+     * @param prefix the current key prefix (for nested keys)
+     * @param keys   the set to add keys to
+     */
+    private void extractKeys(JsonObject obj, String prefix, Set<String> keys) {
+        for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
+            String key = prefix.isEmpty() ? entry.getKey() : prefix + "." + entry.getKey();
+
+            if (entry.getValue().isJsonObject()) {
+                // Recursively extract from nested objects
+                extractKeys(entry.getValue().getAsJsonObject(), key, keys);
+            } else {
+                // Add leaf keys
+                keys.add(key);
+            }
+        }
+    }
+
+    /**
+     * Adds a value to a JsonObject using dot notation for nested keys.
+     * Creates intermediate objects as needed.
+     * 
+     * @param obj   the JsonObject to add the value to
+     * @param key   the key in dot notation (e.g., "ui.button.save")
+     * @param value the value to add
+     */
+    private void addNestedValue(JsonObject obj, String key, JsonElement value) {
+        String[] parts = key.split("\\.");
+
+        if (parts.length == 1) {
+            obj.add(key, value);
+            return;
+        }
+
+        JsonObject current = obj;
+        for (int i = 0; i < parts.length - 1; i++) {
+            String part = parts[i];
+            if (!current.has(part)) {
+                current.add(part, new JsonObject());
+            }
+
+            JsonElement element = current.get(part);
+            if (element.isJsonObject()) {
+                current = element.getAsJsonObject();
+            } else {
+                // If it's not an object, we can't continue
+                return;
+            }
+        }
+
+        current.add(parts[parts.length - 1], value);
     }
 
     private String formatWithPositionalArgs(String template, Object[] args) {
