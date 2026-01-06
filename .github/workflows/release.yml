@@ -89,7 +89,9 @@ jobs:
           - ✅ Combined locales - display multiple languages together
           - ✅ Async preload locales - non-blocking background loading
           - ✅ Resource cleanup - AutoCloseable with proper shutdown
-          - ✅ Comprehensive test suite (149 tests)
+          - ✅ Missing keys extraction - identify untranslated keys
+          - ✅ Write missing keys to file - async batch writing to locale files
+          - ✅ Comprehensive test suite (170 tests)
 
           ### Requirements
           - Java 8 or higher

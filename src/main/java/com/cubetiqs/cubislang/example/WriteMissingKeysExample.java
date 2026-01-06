@@ -14,6 +14,16 @@ import java.nio.file.Paths;
  * written to locale files with empty values for translators to fill in.
  */
 public class WriteMissingKeysExample {
+    
+    // Java 8 compatible string repeat helper
+    private static String repeat(String str, int count) {
+        StringBuilder result = new StringBuilder(str.length() * count);
+        for (int i = 0; i < count; i++) {
+            result.append(str);
+        }
+        return result.toString();
+    }
+    
     public static void main(String[] args) throws Exception {
         // Create temporary directory for demo
         String tempDir = Files.createTempDirectory("cubislang_demo").toString();
@@ -28,9 +38,9 @@ public class WriteMissingKeysExample {
                 "}";
         Files.write(Paths.get(langDir + "en.json"), initialEnContent.getBytes(StandardCharsets.UTF_8));
 
-        System.out.println("=".repeat(70));
+        System.out.println(repeat("=", 70));
         System.out.println("CubisLang - Write Missing Keys to File Demo");
-        System.out.println("=".repeat(70));
+        System.out.println(repeat("=", 70));
         System.out.println("\nInitial en.json content:");
         System.out.println(initialEnContent);
 
@@ -45,9 +55,9 @@ public class WriteMissingKeysExample {
                         .setDebugMode(true) // See what's happening
                         .build()
         )) {
-            System.out.println("\n" + "-".repeat(70));
+            System.out.println("\n" + repeat("-", 70));
             System.out.println("Requesting translations (some exist, some are missing):");
-            System.out.println("-".repeat(70));
+            System.out.println(repeat("-", 70));
 
             // Request existing translations
             System.out.println("hello: " + lang.get("hello"));
@@ -64,15 +74,15 @@ public class WriteMissingKeysExample {
 
             // Read and display the updated file
             String updatedContent = new String(Files.readAllBytes(Paths.get(langDir + "en.json")), StandardCharsets.UTF_8);
-            System.out.println("\n" + "=".repeat(70));
+            System.out.println("\n" + repeat("=", 70));
             System.out.println("Updated en.json content (missing keys added with empty values):");
-            System.out.println("=".repeat(70));
+            System.out.println(repeat("=", 70));
             System.out.println(updatedContent);
 
             // Now demonstrate with another locale
-            System.out.println("\n" + "-".repeat(70));
+            System.out.println("\n" + repeat("-", 70));
             System.out.println("Switching to Khmer locale (will create km.json):");
-            System.out.println("-".repeat(70));
+            System.out.println(repeat("-", 70));
 
             lang.setLocale("km");
             lang.get("greeting_km");
@@ -83,14 +93,14 @@ public class WriteMissingKeysExample {
 
             String kmContent = new String(Files.readAllBytes(Paths.get(langDir + "km.json")), StandardCharsets.UTF_8);
             System.out.println("\nCreated km.json content:");
-            System.out.println("=".repeat(70));
+            System.out.println(repeat("=", 70));
             System.out.println(kmContent);
 
         } // Automatic flush on close
 
-        System.out.println("\n" + "=".repeat(70));
+        System.out.println("\n" + repeat("=", 70));
         System.out.println("Demo completed!");
         System.out.println("Files location: " + langDir);
-        System.out.println("=".repeat(70));
+        System.out.println(repeat("=", 70));
     }
 }
