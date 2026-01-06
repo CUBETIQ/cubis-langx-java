@@ -19,6 +19,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -40,6 +41,10 @@ public class CubisLang implements AutoCloseable {
     private String currentLocale;
     private volatile boolean isShutdown = false;
 
+    // Missing keys batch writer
+    private final Map<String, Set<String>> missingKeysQueue;
+    private final ScheduledExecutorService missingKeysWriterExecutor;
+
     /**
      * Creates a new CubisLang instance with the given options.
      *
@@ -56,6 +61,33 @@ public class CubisLang implements AutoCloseable {
                 .build();
         this.gson = new Gson();
         this.mustacheFactory = new DefaultMustacheFactory();
+
+        // Initialize missing keys batch writer if enabled
+        if (options.isWriteMissingKeysToFile()) {
+            this.missingKeysQueue = new ConcurrentHashMap<>();
+            this.missingKeysWriterExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread thread = new Thread(r, "CubisLang-MissingKeysWriter");
+                thread.setDaemon(true);
+                return thread;
+            });
+            
+            // Schedule periodic flush
+            int interval = options.getMissingKeysFlushIntervalSeconds();
+            this.missingKeysWriterExecutor.scheduleWithFixedDelay(
+                this::flushMissingKeysToFile,
+                interval,
+                interval,
+                TimeUnit.SECONDS
+            );
+            
+            if (options.isDebugMode()) {
+                logger.info("Missing keys batch writer initialized (batch size: {}, flush interval: {}s)",
+                        options.getMissingKeysBatchSize(), interval);
+            }
+        } else {
+            this.missingKeysQueue = null;
+            this.missingKeysWriterExecutor = null;
+        }
 
         // Load initial translations for current locale
         loadTranslations(currentLocale);
@@ -135,6 +167,9 @@ public class CubisLang implements AutoCloseable {
         String translation = getTranslation(currentLocale, key);
 
         if (translation == null) {
+            // Record missing key for batch writing
+            recordMissingKey(currentLocale, key);
+            
             if (options.getMissingTranslationHandler() != null) {
                 options.getMissingTranslationHandler().onMissingTranslation(currentLocale, key);
             }
@@ -235,6 +270,9 @@ public class CubisLang implements AutoCloseable {
         String translation = getTranslation(currentLocale, key);
 
         if (translation == null) {
+            // Record missing key for batch writing
+            recordMissingKey(currentLocale, key);
+            
             if (options.getMissingTranslationHandler() != null) {
                 options.getMissingTranslationHandler().onMissingTranslation(currentLocale, key);
             }
@@ -270,6 +308,9 @@ public class CubisLang implements AutoCloseable {
         }
 
         if (translation == null) {
+            // Record missing key for batch writing
+            recordMissingKey(currentLocale, contextKey);
+            
             if (options.getMissingTranslationHandler() != null) {
                 options.getMissingTranslationHandler().onMissingTranslation(currentLocale, contextKey);
             }
@@ -290,6 +331,9 @@ public class CubisLang implements AutoCloseable {
         String translation = getTranslation(currentLocale, key);
 
         if (translation == null) {
+            // Record missing key for batch writing
+            recordMissingKey(currentLocale, key);
+            
             if (options.getMissingTranslationHandler() != null) {
                 options.getMissingTranslationHandler().onMissingTranslation(currentLocale, key);
             }
@@ -363,6 +407,20 @@ public class CubisLang implements AutoCloseable {
         isShutdown = true;
 
         try {
+            // Flush any remaining missing keys before shutdown
+            if (missingKeysWriterExecutor != null) {
+                flushMissingKeysToFile();
+                missingKeysWriterExecutor.shutdown();
+                try {
+                    if (!missingKeysWriterExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                        missingKeysWriterExecutor.shutdownNow();
+                    }
+                } catch (InterruptedException e) {
+                    missingKeysWriterExecutor.shutdownNow();
+                    Thread.currentThread().interrupt();
+                }
+            }
+
             // Shutdown HTTP client connection pool
             if (httpClient != null) {
                 httpClient.dispatcher().executorService().shutdown();
@@ -865,5 +923,105 @@ public class CubisLang implements AutoCloseable {
 
         byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedContent));
         return new String(decryptedBytes, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Records a missing translation key for later batch writing to the locale file.
+     * This method is thread-safe and non-blocking.
+     *
+     * @param locale the locale where the key is missing
+     * @param key the missing translation key
+     */
+    private void recordMissingKey(String locale, String key) {
+        if (!options.isWriteMissingKeysToFile() || missingKeysQueue == null) {
+            return;
+        }
+
+        missingKeysQueue.computeIfAbsent(locale, k -> ConcurrentHashMap.newKeySet()).add(key);
+
+        // Check if we should flush immediately due to batch size
+        if (missingKeysQueue.get(locale).size() >= options.getMissingKeysBatchSize()) {
+            flushMissingKeysToFile();
+        }
+    }
+
+    /**
+     * Flushes collected missing keys to their respective locale files.
+     * Reads existing locale file, adds missing keys with empty values, and writes back.
+     * This method is called automatically based on flush interval or batch size.
+     */
+    private synchronized void flushMissingKeysToFile() {
+        if (missingKeysQueue == null || missingKeysQueue.isEmpty()) {
+            return;
+        }
+
+        for (Map.Entry<String, Set<String>> entry : missingKeysQueue.entrySet()) {
+            String locale = entry.getKey();
+            Set<String> keys = entry.getValue();
+
+            if (keys.isEmpty()) {
+                continue;
+            }
+
+            try {
+                // Get the locale file path
+                String filePath = options.getResourcePath() + locale + ".json";
+                File file = new File(filePath);
+
+                // Read existing translations or create new object
+                JsonObject localeData;
+                if (file.exists()) {
+                    String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+                    localeData = JsonParser.parseString(content).getAsJsonObject();
+                } else {
+                    localeData = new JsonObject();
+                    // Create parent directories if needed
+                    file.getParentFile().mkdirs();
+                }
+
+                // Add missing keys with empty values
+                int addedCount = 0;
+                for (String key : keys) {
+                    if (!localeData.has(key)) {
+                        localeData.addProperty(key, "");
+                        addedCount++;
+                    }
+                }
+
+                if (addedCount > 0) {
+                    // Write back to file with pretty printing
+                    String json = gson.toJson(localeData);
+                    // Pretty print the JSON
+                    JsonElement element = JsonParser.parseString(json);
+                    String prettyJson = new com.google.gson.GsonBuilder()
+                            .setPrettyPrinting()
+                            .disableHtmlEscaping()
+                            .create()
+                            .toJson(element);
+                    
+                    Files.write(file.toPath(), prettyJson.getBytes(StandardCharsets.UTF_8));
+
+                    if (options.isDebugMode()) {
+                        logger.info("Added {} missing keys to locale file: {}", addedCount, filePath);
+                    }
+                }
+
+                // Clear processed keys for this locale
+                keys.clear();
+
+            } catch (Exception e) {
+                if (options.isDebugMode()) {
+                    logger.error("Error writing missing keys to file for locale: " + locale, e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Manually triggers a flush of collected missing keys to locale files.
+     * Useful when you want to ensure all missing keys are written immediately.
+     */
+    public void flushMissingKeys() {
+        flushMissingKeysToFile();
     }
 }

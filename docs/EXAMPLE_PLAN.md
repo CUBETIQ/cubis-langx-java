@@ -27,6 +27,7 @@ public class HelloWorld {
                 .setMissingTranslationHandler((locale, key) -> {
                     System.out.println("Missing translation for key '" + key + "' in locale '" + locale + "'");
                 }) // Handler for missing translations
+                .setWriteMissingKeysToFile(true) // Write missing keys to a locale lang file with async batch writing and empty values
                 .setCombineLocalesEnabled(true) // Enable combined locales feature (default: is depends on whether combineLocales is set)
                 .setCombineLocales(Arrays.asList("en", "km")) // Combine multiple locales with single text with format: "en / km" => "Hello / សួស្តី" (Note* if locale is not found, only return available locales, e.g., "en" only => "Hello")
                 .setCombineSeparator(" / ") // Separator for combined locales (e.g., " / ")

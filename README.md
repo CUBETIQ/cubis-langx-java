@@ -21,6 +21,7 @@ A powerful and flexible translation (i18n) library for Java applications includi
 -   🌐 **Combined locales** - Display multiple languages in one result
 -   🚀 **Async locale preloading** - Non-blocking background loading for faster access
 -   🔍 **Missing keys extraction** - Identify and extract untranslated keys across locales
+-   📝 **Write missing keys to file** - Async batch writing of missing keys directly to locale files
 -   🧹 **Resource cleanup** - AutoCloseable with proper shutdown
 
 ✨ **Auto-Translation Features:**
@@ -500,6 +501,59 @@ try (CubisLang lang = new CubisLang(
 -   🔍 Audit which locales need updates
 -   📝 Create template files with missing keys
 -   ✅ CI/CD checks to ensure all locales are complete
+
+### Write Missing Keys to Locale Files
+
+Automatically track and write missing translation keys directly to locale files with async batch processing - perfect for development and continuous translation workflows:
+
+```java
+try (CubisLang lang = new CubisLang(
+    CubisLangOptions.builder()
+        .setDefaultLocale("en")
+        .setResourcePath("./resources/lang/")
+        .setWriteMissingKeysToFile(true) // Enable async batch writing
+        .setMissingKeysBatchSize(100) // Flush when 100 keys collected
+        .setMissingKeysFlushIntervalSeconds(30) // Or every 30 seconds
+        .build()
+)) {
+    // As you use translations, missing keys are automatically tracked
+    String greeting = lang.get("missing_greeting");
+    String farewell = lang.get("missing_farewell");
+
+    // Keys are batched and written asynchronously to en.json
+    // The file is updated with missing keys added as empty values:
+    // {
+    //   "hello": "Hello",
+    //   "world": "World",
+    //   "missing_greeting": "",
+    //   "missing_farewell": ""
+    // }
+
+    // Manually trigger flush if needed
+    lang.flushMissingKeys();
+
+    // Switch locale
+    lang.setLocale("km");
+    lang.get("some_key"); // Missing keys written to km.json
+
+} // Automatic final flush on close
+```
+
+**Benefits:**
+
+-   🚀 **Non-blocking** - Runs in background thread, doesn't slow down your app
+-   📦 **Batch processing** - Collects keys and writes in batches for efficiency
+-   🔄 **Automatic flush** - Writes on shutdown or when batch size reached
+-   📝 **Direct to locale files** - Missing keys added to `en.json`, `km.json`, etc.
+-   🎯 **No duplicates** - Each key recorded only once per locale
+-   ✨ **Pretty printed JSON** - Maintains readable format in locale files
+
+**Perfect for:**
+
+-   🔨 Development environments - Automatically collect missing keys as you code
+-   🌍 Continuous translation - Translators can fill in empty values in real locale files
+-   📊 Translation progress tracking - See which keys need translation
+-   🚀 Production monitoring - Track missing keys in live applications
 
 ## Use Cases
 

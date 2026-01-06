@@ -27,6 +27,9 @@ public class CubisLangOptions {
     private final List<String> combineLocales;
     private final String combineSeparator;
     private final List<String> preloadLocales;
+    private final boolean writeMissingKeysToFile;
+    private final int missingKeysBatchSize;
+    private final int missingKeysFlushIntervalSeconds;
 
     private CubisLangOptions(Builder builder) {
         this.defaultLocale = builder.defaultLocale;
@@ -50,6 +53,9 @@ public class CubisLangOptions {
         this.combineLocales = builder.combineLocales;
         this.combineSeparator = builder.combineSeparator;
         this.preloadLocales = builder.preloadLocales;
+        this.writeMissingKeysToFile = builder.writeMissingKeysToFile;
+        this.missingKeysBatchSize = builder.missingKeysBatchSize;
+        this.missingKeysFlushIntervalSeconds = builder.missingKeysFlushIntervalSeconds;
     }
 
     public static Builder builder() {
@@ -82,6 +88,9 @@ public class CubisLangOptions {
     public List<String> getCombineLocales() { return combineLocales; }
     public String getCombineSeparator() { return combineSeparator; }
     public List<String> getPreloadLocales() { return preloadLocales; }
+    public boolean isWriteMissingKeysToFile() { return writeMissingKeysToFile; }
+    public int getMissingKeysBatchSize() { return missingKeysBatchSize; }
+    public int getMissingKeysFlushIntervalSeconds() { return missingKeysFlushIntervalSeconds; }
 
     /**
      * Builder class for CubisLangOptions.
@@ -107,6 +116,9 @@ public class CubisLangOptions {
         private List<String> combineLocales = null;
         private String combineSeparator = " / ";
         private List<String> preloadLocales = null;
+        private boolean writeMissingKeysToFile = false;
+        private int missingKeysBatchSize = 100;
+        private int missingKeysFlushIntervalSeconds = 30;
 
         public Builder setDefaultLocale(String defaultLocale) {
             this.defaultLocale = defaultLocale;
@@ -205,6 +217,21 @@ public class CubisLangOptions {
 
         public Builder setPreloadLocales(List<String> preloadLocales) {
             this.preloadLocales = preloadLocales;
+            return this;
+        }
+
+        public Builder setWriteMissingKeysToFile(boolean writeMissingKeysToFile) {
+            this.writeMissingKeysToFile = writeMissingKeysToFile;
+            return this;
+        }
+
+        public Builder setMissingKeysBatchSize(int missingKeysBatchSize) {
+            this.missingKeysBatchSize = missingKeysBatchSize;
+            return this;
+        }
+
+        public Builder setMissingKeysFlushIntervalSeconds(int missingKeysFlushIntervalSeconds) {
+            this.missingKeysFlushIntervalSeconds = missingKeysFlushIntervalSeconds;
             return this;
         }
 
