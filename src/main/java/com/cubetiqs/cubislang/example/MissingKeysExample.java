@@ -1,4 +1,4 @@
-package com.cubetiqs.cubislang.examples;
+package com.cubetiqs.cubislang.example;
 
 import com.cubetiqs.cubislang.CubisLang;
 import com.cubetiqs.cubislang.CubisLangOptions;
