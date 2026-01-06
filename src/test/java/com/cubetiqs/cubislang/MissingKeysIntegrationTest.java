@@ -101,7 +101,7 @@ public class MissingKeysIntegrationTest {
             Files.write(outputFile, gson.toJson(missingJson).getBytes(StandardCharsets.UTF_8));
             System.out.println("\n6. Saved missing keys to: " + outputFile.getFileName());
             System.out.println("   File content:");
-            System.out.println(Files.readString(outputFile));
+            System.out.println(new String(Files.readAllBytes(outputFile), StandardCharsets.UTF_8));
 
             System.out.println("\n=== Demo Complete ===");
             System.out.println("✅ Missing keys extracted successfully!");

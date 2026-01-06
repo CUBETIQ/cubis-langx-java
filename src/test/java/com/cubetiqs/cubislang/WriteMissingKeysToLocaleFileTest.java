@@ -219,8 +219,13 @@ public class WriteMissingKeysToLocaleFileTest {
             // Read the locale file
             String content = new String(Files.readAllBytes(langDir.resolve("en.json")), StandardCharsets.UTF_8);
             
-            // Count occurrences of duplicate_key
-            long count = content.lines().filter(line -> line.contains("\"duplicate_key\":")).count();
+            // Count occurrences of duplicate_key - Java 8 compatible
+            long count = 0;
+            for (String line : content.split("\n")) {
+                if (line.contains("\"duplicate_key\":")) {
+                    count++;
+                }
+            }
             assertEquals(1, count, "duplicate_key should only appear once");
         }
     }
