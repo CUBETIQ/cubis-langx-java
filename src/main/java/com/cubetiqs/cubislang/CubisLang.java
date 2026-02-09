@@ -45,6 +45,9 @@ public class CubisLang implements AutoCloseable {
     private final Map<String, Set<String>> missingKeysQueue;
     private final ScheduledExecutorService missingKeysWriterExecutor;
 
+    // Pending mutation changes: locale -> (key -> value)
+    private final Map<String, Map<String, String>> pendingChanges = new ConcurrentHashMap<>();
+
     /**
      * Creates a new CubisLang instance with the given options.
      *
@@ -385,6 +388,150 @@ public class CubisLang implements AutoCloseable {
     }
 
     /**
+     * Stages a key-value pair for the current locale.
+     * The value is immediately available in the in-memory cache but is NOT persisted
+     * to the locale file until {@link #commit()} is called.
+     *
+     * @param key   the translation key (supports dot notation for nested keys)
+     * @param value the translation value
+     */
+    public void set(String key, String value) {
+        set(currentLocale, key, value);
+    }
+
+    /**
+     * Stages a key-value pair for a specific locale.
+     * The value is immediately available in the in-memory cache but is NOT persisted
+     * to the locale file until {@link #commit()} is called.
+     *
+     * @param locale the target locale
+     * @param key    the translation key (supports dot notation for nested keys)
+     * @param value  the translation value
+     */
+    public void set(String locale, String key, String value) {
+        if (locale == null || key == null || value == null) {
+            throw new IllegalArgumentException("locale, key, and value must not be null");
+        }
+
+        // Stage the change
+        pendingChanges.computeIfAbsent(locale, k -> new ConcurrentHashMap<>()).put(key, value);
+
+        // Update in-memory translations immediately for fresh reads
+        JsonObject localeTranslations = translations.get(locale);
+        if (localeTranslations == null) {
+            localeTranslations = new JsonObject();
+            translations.put(locale, localeTranslations);
+        }
+        addNestedValue(localeTranslations, key, new com.google.gson.JsonPrimitive(value));
+
+        if (options.isDebugMode()) {
+            logger.info("Staged translation change [{}] {} = {}", locale, key, value);
+        }
+    }
+
+    /**
+     * Persists all staged (pending) changes to their respective locale JSON files.
+     * Each key is either added or updated in the file. Returns the total number of
+     * keys that were written (both new and updated).
+     *
+     * @return the number of affected keys (new + updated)
+     */
+    public int commit() {
+        if (pendingChanges.isEmpty()) {
+            return 0;
+        }
+
+        int affectedKeys = 0;
+
+        for (Map.Entry<String, Map<String, String>> entry : pendingChanges.entrySet()) {
+            String locale = entry.getKey();
+            Map<String, String> changes = entry.getValue();
+
+            if (changes.isEmpty()) {
+                continue;
+            }
+
+            try {
+                String filePath = options.getResourcePath() + locale + ".json";
+                File file = new File(filePath);
+
+                // Read existing file or start fresh
+                JsonObject localeData;
+                if (file.exists()) {
+                    String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+                    localeData = JsonParser.parseString(content).getAsJsonObject();
+                } else {
+                    localeData = new JsonObject();
+                    file.getParentFile().mkdirs();
+                }
+
+                // Apply all staged changes
+                for (Map.Entry<String, String> change : changes.entrySet()) {
+                    addNestedValue(localeData, change.getKey(), new com.google.gson.JsonPrimitive(change.getValue()));
+                    affectedKeys++;
+                }
+
+                // Write back with pretty printing
+                String prettyJson = new com.google.gson.GsonBuilder()
+                        .setPrettyPrinting()
+                        .disableHtmlEscaping()
+                        .create()
+                        .toJson(localeData);
+
+                Files.write(file.toPath(), prettyJson.getBytes(StandardCharsets.UTF_8));
+
+                if (options.isDebugMode()) {
+                    logger.info("Committed {} changes to locale file: {}", changes.size(), filePath);
+                }
+
+            } catch (Exception e) {
+                if (options.isDebugMode()) {
+                    logger.error("Error committing changes for locale: " + locale, e);
+                }
+            }
+        }
+
+        pendingChanges.clear();
+        return affectedKeys;
+    }
+
+    /**
+     * Discards all staged (pending) changes that have not been committed.
+     * Since set() updates the in-memory cache immediately, this method also
+     * reloads the affected locales from their source files to restore the
+     * original values.
+     */
+    public void discard() {
+        if (pendingChanges.isEmpty()) {
+            return;
+        }
+
+        Set<String> affectedLocales = new HashSet<>(pendingChanges.keySet());
+        pendingChanges.clear();
+
+        // Reload affected locales to revert in-memory cache
+        for (String locale : affectedLocales) {
+            translations.remove(locale);
+            cacheTimestamps.remove(locale);
+            loadTranslations(locale);
+        }
+
+        if (options.isDebugMode()) {
+            logger.info("Discarded pending changes and reloaded locales: {}", affectedLocales);
+        }
+    }
+
+    /**
+     * Checks whether there are uncommitted changes.
+     *
+     * @return true if there are pending changes that have not been committed
+     */
+    public boolean hasPendingChanges() {
+        return !pendingChanges.isEmpty();
+    }
+
+
+    /**
      * Reloads translations for the current locale.
      */
     public void reload() {
@@ -407,6 +554,14 @@ public class CubisLang implements AutoCloseable {
         isShutdown = true;
 
         try {
+            // Auto-commit any pending mutation changes before shutdown
+            if (!pendingChanges.isEmpty()) {
+                if (options.isDebugMode()) {
+                    logger.info("Auto-committing {} pending locale(s) before shutdown", pendingChanges.size());
+                }
+                commit();
+            }
+
             // Flush any remaining missing keys before shutdown
             if (missingKeysWriterExecutor != null) {
                 flushMissingKeysToFile();

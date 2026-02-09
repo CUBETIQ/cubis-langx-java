@@ -1,4 +1,7 @@
 {
   "greeting": "你好!",
-  "ui.button_save": "保存"
+  "ui.button_save": "保存",
+  "menu": {
+    "edit": "编辑 已更改 2"
+  }
 }

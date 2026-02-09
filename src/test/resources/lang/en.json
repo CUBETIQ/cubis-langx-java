@@ -14,5 +14,9 @@
   "profile": "{{name}} is {{age}} years old",
   "app.title": "Test Application",
   "menu.file": "File",
-  "menu.edit": "Edit"
+  "menu.edit": "Edit",
+  "new_key": "New Value",
+  "menu": {
+    "edit": "Edit Changed 2"
+  }
 }

@@ -226,4 +226,17 @@ class CubisLangTest {
         assertEquals("Bonjour!", greeting);
         assertEquals("Au revoir!", farewell);
     }
+
+    @Test
+    void testSetKeyValueCalls() {
+        lang.set("new_key", "New Value");
+        lang.set("menu.edit", "Edit Changed 2");
+        lang.set("zh", "menu.edit", "编辑 已更改 2");
+
+        String result = lang.get("new_key");
+        assertEquals("New Value", result);
+
+        int effected = lang.commit();
+        assertTrue(effected > 0);
+    }
 }

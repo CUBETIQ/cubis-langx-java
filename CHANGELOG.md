@@ -5,7 +5,19 @@ All notable changes to the CubisLang Java SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3-SNAPSHOT] - 2026-01-06
+## [1.4-SNAPSHOT] - 2026-02-09
+
+### Added
+- **Staging and committing translation changes** - In-memory caching system for translation modifications
+  - Stage translation updates in memory before committing to files
+  - Commit staged changes to persist modifications to locale files
+  - Rollback capability to discard uncommitted changes
+  - Thread-safe operations with concurrent access support
+  - Preview staged changes before committing
+  - Batch commit operations for multiple translations
+  - Integration with existing translation loading and caching mechanisms
+
+## [1.3.0-SNAPSHOT] - 2026-01-06
 
 ### Added
 - **Write missing keys to file** - Async batch writing of missing translation keys directly to locale files
